@@ -37,7 +37,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
 
-    console.log("Try");
+    // console.log("Try");
     // Example: Extract trial data from request body
     const { id, name, expertise, deadline, dob } = req.body;
 
