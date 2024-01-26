@@ -39,13 +39,16 @@ router.post('/', async (req, res) => {
 
     console.log("Try");
     // Example: Extract trial data from request body
-    const { id, name } = req.body;
+    const { id, name, expertise, deadline, dob } = req.body;
 
     // Your Supabase insert operation here
     const { data, error } = await db.from('trial').upsert([
       {
         id,
         name,
+        expertise,
+        deadline,
+        dob
       },
     ]);
 
