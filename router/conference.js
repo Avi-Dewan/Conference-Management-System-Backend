@@ -6,14 +6,13 @@ const router = express.Router();
 // Create a new conference
 router.post("/create", async (req, res) => {
   try {
-    const { conference_title, conference_status, conference_description, conference_webpage, start_date, end_date, submission_deadline, related_fields } = req.body;
+    const { conference_title, conference_description, conference_webpage, start_date, end_date, submission_deadline, related_fields } = req.body;
 
     const { data, error } = await db
       .from('conference')
       .insert([
         {
           conference_title,
-          conference_status,
           conference_description,
           conference_webpage,
           start_date,
@@ -55,40 +54,28 @@ router.get("/all", async (req, res) => {
 // Get conferences with status = open
 router.get("/open", async (req, res) => {
   try {
+    const currentDate = new Date();
+
     const { data, error } = await db
       .from('conference')
-      .select('*')
-      .eq('conference_status', 'open');
+      .select('*');
 
     if (error) {
       throw error;
     }
 
-    res.status(200).json(data);
+    const openConferences = data.filter(conference => {
+      const submissionDeadline = new Date(`${conference.submission_deadline.date}T${conference.submission_deadline.time}`);
+      return currentDate < submissionDeadline;
+    });
+
+    res.status(200).json(openConferences);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// Get conferences with status = upcoming
-router.get("/upcoming", async (req, res) => {
-  try {
-    const { data, error } = await db
-      .from('conference')
-      .select('*')
-      .eq('conference_status', 'upcoming');
-
-    if (error) {
-      throw error;
-    }
-
-    res.status(200).json(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
 
 // Get a specific conference by ID
 router.get("/:conference_id", async (req, res) => {
