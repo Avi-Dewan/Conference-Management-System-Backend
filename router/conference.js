@@ -6,7 +6,7 @@ const router = express.Router();
 // Create a new conference
 router.post("/create", async (req, res) => {
   try {
-    const { conference_title, conference_description, conference_webpage, start_date, end_date, submission_deadline, related_fields } = req.body;
+    const { conference_title, conference_description, conference_webpage, venue,  start_date, end_date, submission_deadline, related_fields } = req.body;
 
     const { data, error } = await db
       .from('conference')
@@ -14,6 +14,7 @@ router.post("/create", async (req, res) => {
         {
           conference_title,
           conference_description,
+          venue,
           conference_webpage,
           start_date,
           end_date,
