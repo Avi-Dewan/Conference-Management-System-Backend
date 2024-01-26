@@ -4,7 +4,7 @@ const db = require('../db/database');  // Assuming you have a Supabase-compatibl
 const router = express.Router();
 
 // Create a new conference
-router.post("/", async (req, res) => {
+router.post("/create", async (req, res) => {
   try {
     const { conference_title, conference_status, conference_description, conference_webpage, start_date, end_date, submission_deadline, related_fields } = req.body;
 
@@ -104,7 +104,7 @@ router.get("/:conference_id", async (req, res) => {
       throw error;
     }
 
-    res.status(200).json(data);
+    res.status(200).json(data[0]);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
