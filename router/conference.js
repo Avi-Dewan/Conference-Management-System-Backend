@@ -99,4 +99,130 @@ router.get("/:conference_id", async (req, res) => {
   }
 });
 
+
+
+// get conference paper details ( without authors)
+
+router.get("/:conference_id/papers", async (req, res) => {
+  try {
+    const conference_id = req.params.conference_id;
+
+    const { data, error } = await db
+      .from('paper')
+      .select('*')
+      .eq('conference_id', conference_id);
+    
+    if (error) {
+      throw error;
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+// get conference paper details ( with authors)
+// we have a paper table ( primary key = paper_id, foreign id = conference_id)
+// we have a paperAuthor table( primary_key = ( paper_id, user_id))
+// we have user table( primary key = user_id, first_name, last_name)
+
+// get conference paper details (with authors)
+router.get("/:conference_id/papersWithAuthors", async (req, res) => {
+  try {
+    const conference_id = req.params.conference_id;
+
+    // Fetch papers for the given conference_id
+    const { data: papers, error: papersError } = await db
+      .from('paper')
+      .select('*')
+      .eq('conference_id', conference_id);
+
+    if (papersError) {
+      throw papersError;
+    }
+
+    // Fetch authors for each paper
+    const papersWithAuthors = await Promise.all(
+      papers.map(async (paper) => {
+        const { data: authors, error: authorsError } = await db
+          .from('paperAuthor')
+          .select('user_id')
+          .eq('paper_id', paper.paper_id);
+
+        if (authorsError) {
+          throw authorsError;
+        }
+
+        // Fetch full names of authors
+        const authorNames = await Promise.all(
+          authors.map(async (author) => {
+            const { data: user, error: userError } = await db
+              .from('user')
+              .select('*')
+              .eq('user_id', author.user_id)
+              .single();
+
+            if (userError) {
+              throw userError;
+            }
+
+            return `${user.first_name} ${user.last_name}`;
+          })
+        );
+
+        // Add author names to the paper
+        return {
+          ...paper,
+          authors: authorNames,
+        };
+      })
+    );
+
+    res.status(200).json(papersWithAuthors);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+// tell whether conference chair or not
+// we have a conferenceChair( conference_id, user_id )
+
+router.post("/chairOrNot", async (req, res) => {
+  try {
+    const { conference_id, user_id } = req.body;
+
+    // Check whether this user exists in the conferenceChair table
+    const { data: chairData, error: chairError } = await db
+      .from('conferenceChair')
+      .select('user_id')
+      .eq('conference_id', conference_id)
+      .single();
+
+    // console.log(chairData);
+
+    // if (chairError) {
+    //   throw chairError;
+    // }
+
+    if (chairData.user_id == user_id) {
+      // User is a conference chair
+      res.status(200).json({ user_status: "chair" });
+    } else {
+      // User is not a conference chair
+      res.status(200).json({ user_status: "user" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 module.exports = router;
+

@@ -11,6 +11,11 @@ const router = express.Router();
 router.get("/all", async (req, res) => {
   try {
     const { data } = await db.from('user').select('*');
+
+    for(let i=0;i<data.length;i++)
+    {
+      data[i].full_name = data[i].first_name + ' ' + data[i].last_name
+    }
     res.json(data);
   } catch (error) {
     console.error(error.message);
