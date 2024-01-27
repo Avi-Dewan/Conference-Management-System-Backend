@@ -16,13 +16,15 @@ const trailRouter = require("./router/trial");
 const conferenceRouter = require("./router/conference");
 const userRouter = require("./router/user");
 const paperRouter = require("./router/paper");
-const assignRouter = require("./router/assign");
+const assignRouter = require("./router/assign");const authRouter = require("./router/auth");
+
 
 app.use("/trial", trailRouter);
 app.use("/conference", conferenceRouter);
 app.use("/user", userRouter);
 app.use("/paper",paperRouter);
 app.use("/assign", assignRouter);
+app.use("/auth", authRouter);
 
 
 
