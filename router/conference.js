@@ -130,29 +130,6 @@ router.get("/:conference_id/papers", async (req, res) => {
 // we have a paperAuthor table( primary_key = ( paper_id, user_id))
 // we have user table( primary key = user_id, first_name, last_name)
 
-
-// router.get("/:conference_id/papersWithAuthors", async (req, res) => {
-//   try {
-//     const conference_id = req.params.conference_id;
-
-// // from the paper table chose those papers who has same conference_id 
-// // from those papers get user_id's from paperAuthor using paper_id for every paper, 
-// // So, every paper_id has few user_ids.. using those ids get the full_name = first_name + last_name from user table
-
-// // so, out final result is an array of papers ( every paper has paper details and array of full_name of users)
-//     if (error) {
-//       throw error;
-//     }
-
-//     res.status(200).json(data[0]);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
-
-
-
 // get conference paper details (with authors)
 router.get("/:conference_id/papersWithAuthors", async (req, res) => {
   try {
@@ -213,7 +190,39 @@ router.get("/:conference_id/papersWithAuthors", async (req, res) => {
 });
 
 
+// tell whether conference chair or not
+// we have a conferenceChair( conference_id, user_id )
 
-// tell whether conference char or not
+router.post("/chairOrNot", async (req, res) => {
+  try {
+    const { conference_id, user_id } = req.body;
+
+    // Check whether this user exists in the conferenceChair table
+    const { data: chairData, error: chairError } = await db
+      .from('conferenceChair')
+      .select('user_id')
+      .eq('conference_id', conference_id)
+      .single();
+
+    // console.log(chairData);
+
+    // if (chairError) {
+    //   throw chairError;
+    // }
+
+    if (chairData.user_id == user_id) {
+      // User is a conference chair
+      res.status(200).json({ user_status: "chair" });
+    } else {
+      // User is not a conference chair
+      res.status(200).json({ user_status: "user" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 module.exports = router;
+
