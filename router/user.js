@@ -7,42 +7,6 @@ const router = express.Router();
 // user_id ( int) , first_name (text), last_name(text), date_of_birth(date), email(text), current_institution(text), personal_links(array of text), expertise ( array of text)
 
 
-// Add a new user
-router.post("/add", async (req, res) => {
-  try {
-    const {  
-      first_name, 
-      last_name, 
-      date_of_birth, 
-      email, 
-      current_institution, 
-      personal_links, 
-      expertise 
-    } = req.body;
-
-    const { data, error } = await db.from('user').upsert([
-      {
-        first_name,
-        last_name,
-        date_of_birth,
-        email,
-        current_institution,
-        personal_links,
-        expertise,
-      },
-    ]);
-
-    if (error) {
-      throw error;
-    }
-
-    res.status(201).json('User added successfully');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
 // Get all users
 router.get("/all", async (req, res) => {
   try {

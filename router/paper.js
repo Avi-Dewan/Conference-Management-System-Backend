@@ -1,0 +1,92 @@
+// trial.js
+const express = require('express');
+const db = require('../db/database'); 
+
+const { v4: uuidv4 } = require('uuid');
+
+const router = express.Router();
+
+
+
+
+
+router.get("/all", async (req, res) => {
+    try {
+      const { data, error } = await db
+        .from('paper')
+        .select('*');
+  
+      if (error) {
+        throw error;
+      }
+  
+      res.status(200).json(data);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+
+router.post("/create", async (req, res) => {
+    try {
+      const paper_id = uuidv4();
+
+      const rifat = "c89a31f7-da91-42a8-8c6e-9cf5a47742a8";
+      const avi =   "0aa34e07-985a-42ec-8299-48db5ab0581d";
+      const rakib = "53012147-ccd7-4179-8166-76270223a9f2";
+      const nafi =  "b51d5f7c-f023-4e07-aa94-45af7b9340c7";
+      const piol =  "66df2a4d-0ad9-462d-9953-d2453c2b2175";
+
+      var paper1,paper2 , paper3;
+
+      paper1 = "7b3b5479-e7c9-4298-8432-07a95f34ef9b";
+      paper2 = "2b8d62f2-fa14-4ce1-9d78-3f132fbe7d98";
+      paper3 = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
+
+
+    //   const paper_id = paper2;
+
+      const user_id = avi; // this is just to  test the db, actual author_id will come from req.body
+      const { paper_title, abstract, pdf_link, related_fields } = req.body;
+  
+      const { data, error } = await db
+        .from('paper')
+        .insert([
+          {
+            paper_id,
+            paper_title,
+            abstract,
+            pdf_link,
+            related_fields,
+          },
+        ]);
+
+        const {data2 , error2} = await db
+        .from('paperAuthor')
+        .insert([
+            {
+                paper_id,
+                user_id
+            }
+        ]
+        );
+  
+      if ( error2) {
+        throw error;
+      }
+
+      
+  
+      res.status(201).json("Paper created successfully");
+    } catch (error2) {
+      console.error(error2);
+      
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+    
+  });
+
+
+
+module.exports = router;
