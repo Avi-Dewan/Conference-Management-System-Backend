@@ -4,6 +4,11 @@ const db = require('../db/database');
 
 const { v4: uuidv4 } = require('uuid');
 
+
+
+
+
+
 const router = express.Router();
 
 
@@ -28,10 +33,9 @@ router.get("/all", async (req, res) => {
   });
 
 
-router.post("/create", async (req, res) => {
+router.post("/submit", async (req, res) => {
     try {
-      const paper_id = uuidv4();
-
+      
       const rifat = "c89a31f7-da91-42a8-8c6e-9cf5a47742a8";
       const avi =   "0aa34e07-985a-42ec-8299-48db5ab0581d";
       const rakib = "53012147-ccd7-4179-8166-76270223a9f2";
@@ -47,8 +51,22 @@ router.post("/create", async (req, res) => {
 
     //   const paper_id = paper2;
 
-      const user_id = avi; // this is just to  test the db, actual author_id will come from req.body
-      const { paper_title, abstract, pdf_link, related_fields } = req.body;
+      let user_id = avi; // this is just to  test the db, actual author_id will come from req.body
+      let {paper_id, paper_title, abstract, pdf_link, related_fields , file ,co_authors,main_author_id,conference_id} = req.body;
+      
+      paper_id = uuidv4();
+
+      console.log(req.body)
+      
+      
+      let author_id_arr = []
+      for(let i=0;i<co_authors.length;i++)
+      {
+        author_id_arr = [...author_id_arr,co_authors[i].user_id]
+      }
+      author_id_arr = [main_author_id, ... author_id_arr]
+
+
   
       const { data, error } = await db
         .from('paper')
@@ -62,22 +80,28 @@ router.post("/create", async (req, res) => {
           },
         ]);
 
-        const {data2 , error2} = await db
-        .from('paperAuthor')
-        .insert([
-            {
-                paper_id,
-                user_id
-            }
-        ]
-        );
-  
-      if ( error2) {
-        throw error;
+        
+        
+        for(let i=0;i<author_id_arr.length;i++)
+        {
+          user_id = author_id_arr[i];
+          const {data2 , error2} = await db
+          .from('paperAuthor')
+          .insert
+          ([
+              {
+                  paper_id,
+                  user_id
+              }
+          ]
+          );
+        
+    
+        if ( error2) {
+          throw error;
+        }
       }
 
-      
-  
       res.status(201).json("Paper created successfully");
     } catch (error2) {
       console.error(error2);
