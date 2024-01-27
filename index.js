@@ -13,11 +13,13 @@ app.use(cors());
 const trailRouter = require("./router/trial");
 const conferenceRouter = require("./router/conference");
 const userRouter = require("./router/user");
+const authRouter = require("./router/auth");
 
 
 app.use("/trial", trailRouter);
 app.use("/conference", conferenceRouter);
 app.use("/user", userRouter);
+app.use("/auth", authRouter);
 
 
 
