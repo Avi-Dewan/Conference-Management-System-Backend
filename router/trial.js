@@ -8,6 +8,7 @@ const router = express.Router();
 // Get all trials
 router.get('/', async (req, res) => {
   try {
+    
     const { data } = await db.from('trial').select('*');
     res.json(data);
   } catch (error) {
