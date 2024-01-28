@@ -21,14 +21,14 @@ router.get("/auto/:paper_id", async (req, res) => {
 
     var {data, error} = await db
       .from('request')
-      .select('user_id');
+      .select('user_id').eq('paper_id',paper_id);
 
 
       let already_requested = data.map(item =>item.user_id);
 
       var {data, error} = await db
       .from('assignedReviewer')
-      .select('user_id');
+      .select('user_id').eq('paper_id',paper_id);
 
 
       let already_accepted = data.map(item =>item.user_id);  
