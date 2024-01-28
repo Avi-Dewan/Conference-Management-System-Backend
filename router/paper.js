@@ -41,7 +41,7 @@ router.get("/:paper_id/author",async (req,res) =>
       
       const { data, error } = await db
         .from('paperAuthor')
-        .select(`user(first_name,last_name)`)
+        .select(`user(first_name,last_name,current_institution)`)
         
         .eq('paper_id', paper_id);
   
@@ -52,10 +52,14 @@ router.get("/:paper_id/author",async (req,res) =>
       
 
       let returnData = []
+
+      
       for(let i=0;i<data.length;i++)
       {
-          returnData = [...returnData,data[i].user.first_name + ' ' + data[i].user.last_name]
+          returnData = [...returnData,{full_name: data[i].user.first_name + ' ' + data[i].user.last_name,current_institution : data[i].user.current_institution}]
       }
+
+    
 
       
       res.status(200).json(returnData);
