@@ -9,7 +9,7 @@ router.get("/auto/:paper_id", async (req, res) => {
 
      const paper_id = req.params.paper_id;
 
-
+    console.log(paper_id)
 
    
 
@@ -39,7 +39,7 @@ router.get("/auto/:paper_id", async (req, res) => {
 
       already_assigned = [...temp_unique];
 
-
+      
 
 
 
@@ -141,8 +141,12 @@ router.get("/auto/:paper_id", async (req, res) => {
 
   
     
-    if(actual_reviewer_id.length === 0){ // to check if there is any reviewer or not
+    if(actual_reviewer_id.length === 0){
+       // to check if there is any reviewer or not
+
+       
         res.status(200).json(allAuthorName);
+
     }
     else{
         actual_reviewer_id = actual_reviewer_id.map(user => user.user_id); // extract only the reviewer id, and remove other data
@@ -154,13 +158,18 @@ router.get("/auto/:paper_id", async (req, res) => {
         
         for(let i = 0; i<actual_reviewer_id.length;i++)
         {
-          let {data,err} = await db.from('user').select(`first_name,last_name`).eq('user_id',actual_reviewer_id[i]);
+          let {data,err} = await db.from('user').select(`*`).eq('user_id',actual_reviewer_id[i]);
           
           let full_name = data[0].first_name + ' ' + data[0].last_name
           
-          allAuthorName = [...allAuthorName,{user_id:actual_reviewer_id[i],full_name:full_name}]
+          data[0].full_name = full_name
+         
+          
+          allAuthorName = [...allAuthorName,data[0]]
+
+          
         }
-        
+       
         res.status(200).json(allAuthorName);
     }
 
@@ -192,7 +201,7 @@ router.get("/auto/:paper_id", async (req, res) => {
 router.get("/manual/:paper_id", async (req, res) => {
   try {
 
-    //  const paper_id = req.params.paper_id;
+      const paper_id = req.params.paper_id;
 
 
 
@@ -200,7 +209,7 @@ router.get("/manual/:paper_id", async (req, res) => {
     const paper2 = "2b8d62f2-fa14-4ce1-9d78-3f132fbe7d98";
     const paper3 = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
 
-    const paper_id = paper3;
+    //const paper_id = paper3;
 
     var already_assigned = [];
     //already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
@@ -208,14 +217,14 @@ router.get("/manual/:paper_id", async (req, res) => {
 
     var {data, error} = await db
       .from('request')
-      .select('user_id');
+      .select('user_id').eq('paper_id',paper_id);
 
 
       let already_requested = data.map(item =>item.user_id);
 
       var {data, error} = await db
       .from('assignedReviewer')
-      .select('user_id');
+      .select('user_id').eq('paper_id',paper_id);
 
 
       let already_accepted = data.map(item =>item.user_id);  
@@ -333,11 +342,16 @@ router.get("/manual/:paper_id", async (req, res) => {
         
         for(let i = 0; i<actual_reviewer_id.length;i++)
         {
-          let {data,err} = await db.from('user').select(`first_name,last_name`).eq('user_id',actual_reviewer_id[i]);
+          let {data,err} = await db.from('user').select(`*`).eq('user_id',actual_reviewer_id[i]);
           
           let full_name = data[0].first_name + ' ' + data[0].last_name
           
-          allAuthorName = [...allAuthorName,{user_id:actual_reviewer_id[i],full_name:full_name}]
+          data[0].full_name = full_name
+         
+          
+          allAuthorName = [...allAuthorName,data[0]]
+
+          
         }
         
         res.status(200).json(allAuthorName);
@@ -399,14 +413,16 @@ router.post("/request", async (req, res) => {
 });
 
 
-router.get("/sent_request", async (req, res) => {
+router.get("/sent_request/:paper_id", async (req, res) => {
   try {
 
-    // user_id = req.body.user_id
-    // paper_id = req.body.paper_id
+     
+    const paper_id = req.params.paper_id;
+
+    console.log(paper_id)
 
     
-    let paper_id = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
+    //let paper_id = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
     
     
     const { data, error } = await db
@@ -460,9 +476,11 @@ router.get("/sent_request", async (req, res) => {
 router.post("/request_delete", async (req, res) => {
   try {
     
-    const paper_id = "b04ffd91-7316-4a42-9bf1-54b0e0e1f83f";
+    const paper_id = req.body.paper_id;
 
-    const user_id = "66df2a4d-0ad9-462d-9953-d2453c2b2175";
+    const user_id = req.body.user_id;
+    
+    console.log(paper_id,user_id,"delete")
 
     const { data, error } = await db
       .from('request')

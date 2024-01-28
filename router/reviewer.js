@@ -69,6 +69,39 @@ router.get("/assignedPapers/:user_id", async (req, res) => {
     }
 });
 
+router.get("/assigned/:paper_id", async (req, res) => {
+    try {
+
+        const paper_id = req.params.paper_id;
+        const { data , error } = await db.from('assignedReviewer').select('user(*)').eq('paper_id',paper_id);
+
+        if(error) 
+        {
+            
+            res.json([]);
+            return;
+        }
+        // Flatten the data structure and add the full_name property
+        const flattenedData = data.map(entry => ({
+            user_id: entry.user.user_id,
+            full_name: `${entry.user.first_name} ${entry.user.last_name}`,
+            email: entry.user.email,
+            expertise: entry.user.expertise,
+            user_type: `${entry.user.user_type}`,
+            date_of_birth: entry.user.date_of_birth,
+            personal_links: entry.user.personal_links,
+            current_institution: entry.user.current_institution,
+            // Add other properties from the user object if needed
+        }));
+        
+        
+        res.json(flattenedData)
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 
 module.exports = router;
