@@ -7,18 +7,48 @@ const router = express.Router();
 router.get("/auto/:paper_id", async (req, res) => {
   try {
 
-    // const paper_id = req.params.paper_id;
+     const paper_id = req.params.paper_id;
 
 
 
-    const paper1 = "7b3b5479-e7c9-4298-8432-07a95f34ef9b";
-    const paper2 = "2b8d62f2-fa14-4ce1-9d78-3f132fbe7d98";
-    const paper3 = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
+   
 
     var already_assigned = [];
-    // already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
+    //already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
 
-    const paper_id = paper3;
+    //const paper_id = paper3;
+
+
+    var {data, error} = await db
+      .from('request')
+      .select('user_id');
+
+
+      let already_requested = data.map(item =>item.user_id);
+
+      var {data, error} = await db
+      .from('assignedReviewer')
+      .select('user_id');
+
+
+      let already_accepted = data.map(item =>item.user_id);  
+
+      already_assigned = [...already_accepted , ...already_requested];
+
+      const temp_unique = new Set(already_assigned);
+
+      already_assigned = [...temp_unique];
+
+
+
+
+
+
+
+
+
+
+
 
 
     var { data, error } = await db //fetching data from paper table.
@@ -102,14 +132,45 @@ router.get("/auto/:paper_id", async (req, res) => {
       filter out the already assigned reviewers
     */
 
+    let dataT = []
 
+      
+    //console.log(actual_reviewer_id)
 
-    if(actual_reviewer_id.length === 0){ // to check if there is any reviewer or not
-        res.status(200).json("kothao keu nei");
+    let allAuthorName = []
+
+  
+    
+    if(actual_reviewer_id.length === 0){
+       // to check if there is any reviewer or not
+
+       
+        res.status(200).json(allAuthorName);
+
     }
     else{
         actual_reviewer_id = actual_reviewer_id.map(user => user.user_id); // extract only the reviewer id, and remove other data
-        res.status(200).json(actual_reviewer_id);
+
+        
+
+        console.log(actual_reviewer_id)
+
+        
+        for(let i = 0; i<actual_reviewer_id.length;i++)
+        {
+          let {data,err} = await db.from('user').select(`*`).eq('user_id',actual_reviewer_id[i]);
+          
+          let full_name = data[0].first_name + ' ' + data[0].last_name
+          
+          data[0].full_name = full_name
+         
+          
+          allAuthorName = [...allAuthorName,data[0]]
+
+          
+        }
+       
+        res.status(200).json(allAuthorName);
     }
 
 
@@ -140,7 +201,7 @@ router.get("/auto/:paper_id", async (req, res) => {
 router.get("/manual/:paper_id", async (req, res) => {
   try {
 
-    // const paper_id = req.params.paper_id;
+    //  const paper_id = req.params.paper_id;
 
 
 
@@ -151,7 +212,36 @@ router.get("/manual/:paper_id", async (req, res) => {
     const paper_id = paper3;
 
     var already_assigned = [];
-    // already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
+    //already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
+
+
+    var {data, error} = await db
+      .from('request')
+      .select('user_id');
+
+
+      let already_requested = data.map(item =>item.user_id);
+
+      var {data, error} = await db
+      .from('assignedReviewer')
+      .select('user_id');
+
+
+      let already_accepted = data.map(item =>item.user_id);  
+
+      already_assigned = [...already_accepted , ...already_requested];
+
+      const temp_unique = new Set(already_assigned);
+
+      already_assigned = [...temp_unique];
+
+      // already_assigned = [];
+
+      console.log("already assigned");
+
+      console.log(already_assigned);
+
+
 
 
     var { data, error } = await db //fetching data from paper table.
@@ -233,12 +323,38 @@ router.get("/manual/:paper_id", async (req, res) => {
       filter out the already assigned reviewers
     */
 
+     let allAuthorName = []
+
+  
+    
     if(actual_reviewer_id.length === 0){ // to check if there is any reviewer or not
-        res.status(200).json("kothao keu nei");
+        
+      console.log("is empty");
+      res.status(200).json(allAuthorName);
     }
     else{
         actual_reviewer_id = actual_reviewer_id.map(user => user.user_id); // extract only the reviewer id, and remove other data
-        res.status(200).json(actual_reviewer_id);
+
+        
+
+        console.log(actual_reviewer_id)
+
+        
+        for(let i = 0; i<actual_reviewer_id.length;i++)
+        {
+          let {data,err} = await db.from('user').select(`*`).eq('user_id',actual_reviewer_id[i]);
+          
+          let full_name = data[0].first_name + ' ' + data[0].last_name
+          
+          data[0].full_name = full_name
+         
+          
+          allAuthorName = [...allAuthorName,data[0]]
+
+          
+        }
+        
+        res.status(200).json(allAuthorName);
     }
 
 
@@ -268,11 +384,11 @@ router.get("/manual/:paper_id", async (req, res) => {
 
 router.post("/request", async (req, res) => {
   try {
+
+    user_id = req.body.user_id
+    paper_id = req.body.paper_id
     
-    const paper_id = "b04ffd91-7316-4a42-9bf1-54b0e0e1f83f";
-
-    const user_id = "66df2a4d-0ad9-462d-9953-d2453c2b2175";
-
+    
     const { data, error } = await db
       .from('request')
       .insert([
@@ -297,6 +413,88 @@ router.post("/request", async (req, res) => {
 });
 
 
+router.get("/sent_request", async (req, res) => {
+  try {
+
+    // user_id = req.body.user_id
+    // paper_id = req.body.paper_id
+
+    
+    let paper_id = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
+    
+    
+    const { data, error } = await db
+      .from('request')
+      .select('*')
+      .eq("paper_id",paper_id);
+
+
+      const UserIds = [...new Set(data.map(item => item.user_id))];
+
+      let user_info = [];
+      for(let i = 0; i<UserIds.length; i++){
+  
+          let uid = UserIds[i];
+          const {data, error} = await db
+          .from('user')
+          .select('*')
+          .eq('user_id' , uid);
+
+          user_info.push(data);
+  
+          
+      }
+  
+      user_info =  user_info.flat();
+      console.log(user_info);
+
+      const output = user_info.map(user => {
+        const full_name = `${user.first_name} ${user.last_name}`;
+        return {
+          ...user,
+          full_name: full_name,
+        }
+      });
+
+
+    if (error) {
+      throw error;
+    }
+
+    console.log("does it come here");
+
+
+    res.status(201).json(output);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.post("/request_delete", async (req, res) => {
+  try {
+    
+    const paper_id = req.body.paper_id;
+
+    const user_id = req.body.user_id;
+    console.log("ggggggggggggggggggggggggggggggggggggggggggg")
+    console.log(paper_id,user_id,"delete")
+
+    const { data, error } = await db
+      .from('request')
+      .delete()
+      .match({"user_id":user_id , "paper_id":paper_id});
+      res.status(201).json("deleted successfully");
+
+    if (error) {
+      throw error;
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 
