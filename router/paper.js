@@ -13,7 +13,58 @@ const router = express.Router();
 
 
 
+router.get("/:paper_id",async (req,res) => 
+{
+  try {
+      const paper_id = req.params.paper_id;
+      const { data, error } = await db
+        .from('paper')
+        .select('*')
+        .eq('paper_id', paper_id);
+  
+      if (error) {
+        throw error;
+      }
+  
+      res.status(200).json(data);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
 
+});
+router.get("/:paper_id/author",async (req,res) => 
+{
+  try {
+      const paper_id = req.params.paper_id;
+
+      
+      const { data, error } = await db
+        .from('paperAuthor')
+        .select(`user(first_name,last_name)`)
+        
+        .eq('paper_id', paper_id);
+  
+      if (error) {
+        throw error;
+      }
+      
+      
+
+      let returnData = []
+      for(let i=0;i<data.length;i++)
+      {
+          returnData = [...returnData,data[i].user.first_name + ' ' + data[i].user.last_name]
+      }
+
+      
+      res.status(200).json(returnData);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+});
 
 router.get("/all", async (req, res) => {
     try {
