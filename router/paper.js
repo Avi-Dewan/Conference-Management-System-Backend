@@ -77,6 +77,7 @@ router.post("/submit", async (req, res) => {
             abstract,
             pdf_link,
             related_fields,
+            conference_id,
           },
         ]);
 
