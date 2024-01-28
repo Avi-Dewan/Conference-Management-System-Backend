@@ -109,8 +109,12 @@ router.get("/auto/:paper_id", async (req, res) => {
 
   
     
-    if(actual_reviewer_id.length === 0){ // to check if there is any reviewer or not
+    if(actual_reviewer_id.length === 0){
+       // to check if there is any reviewer or not
+
+       
         res.status(200).json(allAuthorName);
+
     }
     else{
         actual_reviewer_id = actual_reviewer_id.map(user => user.user_id); // extract only the reviewer id, and remove other data
@@ -122,13 +126,18 @@ router.get("/auto/:paper_id", async (req, res) => {
         
         for(let i = 0; i<actual_reviewer_id.length;i++)
         {
-          let {data,err} = await db.from('user').select(`first_name,last_name`).eq('user_id',actual_reviewer_id[i]);
+          let {data,err} = await db.from('user').select(`*`).eq('user_id',actual_reviewer_id[i]);
           
           let full_name = data[0].first_name + ' ' + data[0].last_name
           
-          allAuthorName = [...allAuthorName,{user_id:actual_reviewer_id[i],full_name:full_name}]
+          data[0].full_name = full_name
+         
+          
+          allAuthorName = [...allAuthorName,data[0]]
+
+          
         }
-        
+       
         res.status(200).json(allAuthorName);
     }
 
@@ -270,11 +279,16 @@ router.get("/manual/:paper_id", async (req, res) => {
         
         for(let i = 0; i<actual_reviewer_id.length;i++)
         {
-          let {data,err} = await db.from('user').select(`first_name,last_name`).eq('user_id',actual_reviewer_id[i]);
+          let {data,err} = await db.from('user').select(`*`).eq('user_id',actual_reviewer_id[i]);
           
           let full_name = data[0].first_name + ' ' + data[0].last_name
           
-          allAuthorName = [...allAuthorName,{user_id:actual_reviewer_id[i],full_name:full_name}]
+          data[0].full_name = full_name
+         
+          
+          allAuthorName = [...allAuthorName,data[0]]
+
+          
         }
         
         res.status(200).json(allAuthorName);
@@ -338,9 +352,11 @@ router.post("/request", async (req, res) => {
 router.post("/request_delete", async (req, res) => {
   try {
     
-    const paper_id = "b04ffd91-7316-4a42-9bf1-54b0e0e1f83f";
+    const paper_id = req.body.paper_id;
 
-    const user_id = "66df2a4d-0ad9-462d-9953-d2453c2b2175";
+    const user_id = req.body.user_id;
+    console.log("ggggggggggggggggggggggggggggggggggggggggggg")
+    console.log(paper_id,user_id,"delete")
 
     const { data, error } = await db
       .from('request')
