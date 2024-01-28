@@ -7,18 +7,16 @@ const router = express.Router();
 router.get("/auto/:paper_id", async (req, res) => {
   try {
 
-    // const paper_id = req.params.paper_id;
+     const paper_id = req.params.paper_id;
 
 
 
-    const paper1 = "7b3b5479-e7c9-4298-8432-07a95f34ef9b";
-    const paper2 = "2b8d62f2-fa14-4ce1-9d78-3f132fbe7d98";
-    const paper3 = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
+   
 
     var already_assigned = [];
-    already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
+    //already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
 
-    const paper_id = paper3;
+    //const paper_id = paper3;
 
 
     var { data, error } = await db //fetching data from paper table.
@@ -102,14 +100,36 @@ router.get("/auto/:paper_id", async (req, res) => {
       filter out the already assigned reviewers
     */
 
+    let dataT = []
 
+      
+    //console.log(actual_reviewer_id)
 
+    let allAuthorName = []
+
+  
+    
     if(actual_reviewer_id.length === 0){ // to check if there is any reviewer or not
-        res.status(200).json("kothao keu nei");
+        res.status(200).json(allAuthorName);
     }
     else{
         actual_reviewer_id = actual_reviewer_id.map(user => user.user_id); // extract only the reviewer id, and remove other data
-        res.status(200).json(actual_reviewer_id);
+
+        
+
+        console.log(actual_reviewer_id)
+
+        
+        for(let i = 0; i<actual_reviewer_id.length;i++)
+        {
+          let {data,err} = await db.from('user').select(`first_name,last_name`).eq('user_id',actual_reviewer_id[i]);
+          
+          let full_name = data[0].first_name + ' ' + data[0].last_name
+          
+          allAuthorName = [...allAuthorName,{user_id:actual_reviewer_id[i],full_name:full_name}]
+        }
+        
+        res.status(200).json(allAuthorName);
     }
 
 
@@ -140,7 +160,7 @@ router.get("/auto/:paper_id", async (req, res) => {
 router.get("/manual/:paper_id", async (req, res) => {
   try {
 
-    // const paper_id = req.params.paper_id;
+     const paper_id = req.params.paper_id;
 
 
 
@@ -148,10 +168,10 @@ router.get("/manual/:paper_id", async (req, res) => {
     const paper2 = "2b8d62f2-fa14-4ce1-9d78-3f132fbe7d98";
     const paper3 = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
 
-    const paper_id = paper3;
+    //const paper_id = paper3;
 
     var already_assigned = [];
-    already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
+    //already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
 
 
     var { data, error } = await db //fetching data from paper table.
@@ -233,12 +253,31 @@ router.get("/manual/:paper_id", async (req, res) => {
       filter out the already assigned reviewers
     */
 
+     let allAuthorName = []
+
+  
+    
     if(actual_reviewer_id.length === 0){ // to check if there is any reviewer or not
-        res.status(200).json("kothao keu nei");
+        res.status(200).json(allAuthorName);
     }
     else{
         actual_reviewer_id = actual_reviewer_id.map(user => user.user_id); // extract only the reviewer id, and remove other data
-        res.status(200).json(actual_reviewer_id);
+
+        
+
+        console.log(actual_reviewer_id)
+
+        
+        for(let i = 0; i<actual_reviewer_id.length;i++)
+        {
+          let {data,err} = await db.from('user').select(`first_name,last_name`).eq('user_id',actual_reviewer_id[i]);
+          
+          let full_name = data[0].first_name + ' ' + data[0].last_name
+          
+          allAuthorName = [...allAuthorName,{user_id:actual_reviewer_id[i],full_name:full_name}]
+        }
+        
+        res.status(200).json(allAuthorName);
     }
 
 
@@ -268,11 +307,11 @@ router.get("/manual/:paper_id", async (req, res) => {
 
 router.post("/request", async (req, res) => {
   try {
+
+    user_id = req.body.user_id
+    paper_id = req.body.paper_id
     
-    const paper_id = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
-
-    const user_id = "66df2a4d-0ad9-462d-9953-d2453c2b2175";
-
+    
     const { data, error } = await db
       .from('request')
       .insert([
