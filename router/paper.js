@@ -165,4 +165,31 @@ router.post("/submit", async (req, res) => {
 
 
 
+  router.get("/get_conference/:paper_id", async (req, res) => { //retrieves paper info based on paper id
+    try {
+
+      const paper_id = "7b3b5479-e7c9-4298-8432-07a95f34ef9b";
+
+      const { data, error } = await db
+        .from('paper')
+        .select('*')
+        .eq('paper_id', paper_id);
+  
+      if (error) {
+        throw error;
+      }
+  
+      res.status(200).json(data);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+
+
+
+
+
+
 module.exports = router;
