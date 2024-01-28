@@ -16,7 +16,7 @@ router.get("/auto/:paper_id", async (req, res) => {
     const paper3 = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
 
     var already_assigned = [];
-    already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
+    // already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
 
     const paper_id = paper3;
 
@@ -151,7 +151,7 @@ router.get("/manual/:paper_id", async (req, res) => {
     const paper_id = paper3;
 
     var already_assigned = [];
-    already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
+    // already_assigned.push("66df2a4d-0ad9-462d-9953-d2453c2b2175"); // reviewers that are already assinged
 
 
     var { data, error } = await db //fetching data from paper table.
@@ -269,7 +269,7 @@ router.get("/manual/:paper_id", async (req, res) => {
 router.post("/request", async (req, res) => {
   try {
     
-    const paper_id = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
+    const paper_id = "b04ffd91-7316-4a42-9bf1-54b0e0e1f83f";
 
     const user_id = "66df2a4d-0ad9-462d-9953-d2453c2b2175";
 
