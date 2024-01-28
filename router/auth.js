@@ -101,7 +101,7 @@ router.post('/login', async (req, res) => {
     }
 
     // You can return the user_id or any other relevant information
-    res.status(200).json({ user_id: authData.user_id });
+    res.status(200).json({ user_id: authData.user_id, user_type: authData.user_type });
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
