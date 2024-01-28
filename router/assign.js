@@ -296,7 +296,28 @@ router.post("/request", async (req, res) => {
   }
 });
 
+router.post("/request_delete", async (req, res) => {
+  try {
+    
+    const paper_id = "b04ffd91-7316-4a42-9bf1-54b0e0e1f83f";
 
+    const user_id = "66df2a4d-0ad9-462d-9953-d2453c2b2175";
+
+    const { data, error } = await db
+      .from('request')
+      .delete()
+      .match({"user_id":user_id , "paper_id":paper_id});
+      res.status(201).json("deleted successfully");
+
+    if (error) {
+      throw error;
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 
