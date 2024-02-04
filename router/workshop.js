@@ -40,7 +40,7 @@ router.get('/all/:conference_id', async (req, res) => {
   try {
     const conferenceId = req.params.conference_id;
     const { data, error } = await db
-      .from('workshops')
+      .from('workshop')
       .select('*')
       .eq('conference_id', conferenceId);
 
@@ -60,9 +60,9 @@ router.get('/:id', async (req, res) => {
   try {
     const workshopId = req.params.id;
     const { data, error } = await db
-      .from('workshops')
+      .from('workshop')
       .select('*')
-      .eq('id', workshopId);
+      .eq('workshop_id', workshopId);
 
     if (error) {
       throw error;
