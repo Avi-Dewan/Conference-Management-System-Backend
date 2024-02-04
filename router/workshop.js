@@ -3,25 +3,28 @@ const db = require('../db/database');  // Assuming you have a Supabase-compatibl
 
 const router = express.Router();
 
+const sqlQuery = `
+    INSERT INTO workshop (workshop_title,workshop_description,related_fields,workshop_duration)
+    VALUES ($1, $2, $3, $4);
+`;
+
 // Create a new conference
 router.post("/create", async (req, res) => {
   try {
-    const { workshop_title, workshop_description,related_fields,workshop_duration,workshop_time } = req.body;
+    const { workshop_title, workshop_description,related_fields,workshop_duration} = req.body;
 
+    console.log(req.body)
     const { data, error } = await db
-      .from('conference')
+      .from('workshop')
       .insert([
         {
-          conference_title,
-          conference_description,
-          venue,
-          conference_webpage,
-          start_date,
-          end_date,
-          submission_deadline,
+          workshop_title,
+          workshop_description,
           related_fields,
+          workshop_duration
         },
       ]);
+      
 
     if (error) {
       throw error;
