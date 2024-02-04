@@ -58,6 +58,37 @@ router.get('/all/:conference_id', async (req, res) => {
   }
 });
 
+
+// Get all workshops for a conference by conference ID
+router.get('/popular/:conference_id', async (req, res) => {
+  try {
+    const conferenceId = req.params.conference_id;
+
+  
+    const { data, error } = await db
+      .from('workshop')
+      .select('*')
+      .eq('conference_id', conferenceId);
+
+    if (error) {
+      throw error;
+    }
+
+    console.log("popular list");
+    
+
+    data.sort(((a, b) => b.count - a.count));
+    console.log(data);
+    res.json(data);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
+
+
 // Get a workshop by specific ID
 router.get('/:id', async (req, res) => {
   try {
@@ -141,5 +172,52 @@ router.post('/suggestTeachers', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+
+router.post('/interested/:conference_id', async (req, res) => {
+  try {
+    let workshop_id = req.body.workshop_id;
+
+    // let workshop_id = "e63d4221-f3fb-45d2-b7cd-cea0f0b837c6";
+
+    let val = req.body.value;
+
+    var {data, error} = await db
+    .from('workshop')
+    .select('*')
+    .eq('workshop_id' , workshop_id);
+
+    // console.log("ekhane ase, workshop e")
+    // console.log(data);
+
+
+
+    console.log("count hocche");
+    let interest_count = data[0].count;
+
+    // console.log(interest_count);
+
+    let new_count;
+    if(val === "1"){
+      new_count = 1
+    }
+    else{
+      new_count = -1
+    }
+
+    var {data, error} = await db
+    .from('workshop')
+    .update({ count:interest_count +new_count })
+    .eq('workshop_id' , workshop_id);
+
+    res.status(201).json("interest count updated successfully");
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 module.exports = router;
 
