@@ -8,7 +8,7 @@ const router = express.Router();
 // Create a new conference
 router.post("/create", async (req, res) => {
   try {
-    const { workshop_title, workshop_description,related_fields,workshop_duration} = req.body;
+    const { workshop_title, workshop_description,related_fields,workshop_duration,conference_id} = req.body;
 
     console.log(req.body)
     const { data, error } = await db
@@ -18,7 +18,8 @@ router.post("/create", async (req, res) => {
           workshop_title,
           workshop_description,
           related_fields,
-          workshop_duration
+          workshop_duration,
+          conference_id
         },
       ]);
       
@@ -39,6 +40,8 @@ router.post("/create", async (req, res) => {
 router.get('/all/:conference_id', async (req, res) => {
   try {
     const conferenceId = req.params.conference_id;
+
+  
     const { data, error } = await db
       .from('workshop')
       .select('*')
