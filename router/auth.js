@@ -74,7 +74,7 @@ router.post('/signup', async (req, res) => {
       throw authError;
     }
 
-    res.status(201).json('User added successfully');
+    res.status(201).json({success: 'User added successfully', user_id: user_id});
 
   } catch (error) {
     console.error(error);

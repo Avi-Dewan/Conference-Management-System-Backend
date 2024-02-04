@@ -1,0 +1,345 @@
+[
+    {
+        "usecase": {
+            "name": "Conference Creation",
+            "scenario": "Conference Chair creates a conference.",
+            "actors": "Conference Chair",
+            "preconditions": "User is registered as conference Chair in the website",
+            "steps": [
+                "Conference Chair enters conference title",
+                "Conference Chair enters conference description",
+                "Conference Chair enters conference webpage",
+                "Conference Chair enters conference venue",
+                "Conference Chair selects conference start date, end date",
+                "Conference Chair selects submission deadline",
+                "Conference Chair enters research track",
+                "Conference Chair creates the conference"
+            ]
+        },
+        "testcases": [
+            {
+                "name": "Valid Conference Creation",
+                "description": "Verify that a conference chair has successfully created a conference.",
+                "input": {
+                    "conference_title": "saydg rence",
+                    "conference_description": "An example conference",
+                    "venue": "Khag",
+                    "conference_webpage": "http://example-conference.com",
+                    "start_date": "2024-02-01",
+                    "end_date": "2024-02-03",
+                    "submission_deadline": {
+                      "date": "2024-01-26",
+                      "time": "20:00:00"
+                    },
+                    "research_tracks": ["Technology", "Science"]
+                },
+                "expected": {
+                    "outcome": "Conference creation successful",
+                    "status": "Success"
+                }
+            },
+            {
+                "name": "Unauthorized conference chair",
+                "description": "Verify that the system handles the case where an unauthorized user tries to create a conference",
+                "input": {
+                    "conference_title": "saydg rence",
+                    "conference_description": "An example conference",
+                    "venue": "Khag",
+                    "conference_webpage": "http://example-conference.com",
+                    "start_date": "2024-02-01",
+                    "end_date": "2024-02-03",
+                    "submission_deadline": {
+                      "date": "2024-01-26",
+                      "time": "20:00:00"
+                    },
+                    "research_tracks": ["Technology", "Science"]
+                },
+                "expected": {
+                    "outcome": "Conference creation unsuccessful",
+                    "status": "Failed"
+                }
+            },
+            {
+                "name": "Empty Conference Title",
+                "description": "Verify that the system handles the case where a chair tries to create a conference without title",
+                "input": {
+                    "conference_title": "",
+                    "conference_description": "An example conference",
+                    "venue": "Khag",
+                    "conference_webpage": "http://example-conference.com",
+                    "start_date": "2024-02-01",
+                    "end_date": "2024-02-03",
+                    "submission_deadline": {
+                      "date": "2024-01-26",
+                      "time": "20:00:00"
+                    },
+                    "research_tracks": ["Technology", "Science"]
+                },
+                "expected": {
+                    "outcome": "Conference creation unsuccessful",
+                    "status": "Failed"
+                }
+            },
+            {
+                "name": "Empty research track",
+                "description": "Verify that the system handles the case where a chair tries to create a conference without any research track",
+                "input": {
+                    "conference_title": "",
+                    "conference_description": "An example conference",
+                    "venue": "Khag",
+                    "conference_webpage": "http://example-conference.com",
+                    "start_date": "2024-02-01",
+                    "end_date": "2024-02-03",
+                    "submission_deadline": {
+                      "date": "2024-01-26",
+                      "time": "20:00:00"
+                    },
+                    "research_tracks": []
+                },
+                "expected": {
+                    "outcome": "Conference creation unsuccessful",
+                    "status": "Failed"
+                }
+            }
+            
+        ]
+    }, {
+        "usecase": {
+            "name": "Paper Submission",
+            "scenario": "Users submit a paper in a conference.",
+            "actors": "Users",
+            "preconditions": "User is registered in the website",
+            "steps": [
+                "User enters paper title",
+                "User selects co-authors",
+                "User selects reaseach track",
+                "User enters abstract",
+                "User uploads pdf of the paper",
+                "User submits the paper"
+            ]
+        },
+        "testcases": [
+            {
+                "name": "Valid Paper Submission",
+                "description": "Verify that a user has successfully submitted a paper.",
+                "input": {
+                    "paper_title":"paper on graph",
+                    "abstract":"the abstact of the paper is goood. Handles a critical case",
+                    "pdf_link":"www.abc.com",
+                    "related_fields":["graph"]
+                },
+                "expected": {
+                    "outcome": "Submission successful",
+                    "status": "Success"
+                }
+            },
+            {
+                "name": "Empty Paper Title Submission",
+                "description": "Verify that the system handles the case where a user tries to submit an empty paper title",
+                "input": {
+                    "paper_title":"",
+                    "abstract":"the abstact of the paper is goood. Handles a critical case",
+                    "pdf_link":"www.abc.com",
+                    "related_fields":["graph"]
+                },
+                "expected": {
+                    "outcome": "Submission failed",
+                    "status": "Not Submitted"
+                }
+            },
+            {
+                "name": "Empty Paper Abstract Submission",
+                "description": "Verify that the system handles the case where a user tries to submit an empty paper abstract",
+                "input": {
+                    "paper_title":"Paper title here",
+                    "abstract":"",
+                    "pdf_link":"www.abc.com",
+                    "related_fields":["graph"]
+                },
+                "expected": {
+                    "outcome": "Submission failed",
+                    "status": "Not Submitted"
+                }
+            },
+            {
+                "name": "No pdf file uploaded",
+                "description": "Verify that the system handles the case where a user tries to submit without uploading paper pdf",
+                "input": {
+                    "paper_title":"paper on graph",
+                    "abstract":"the abstact of the paper is goood. Handles a critical case",
+                    "pdf_link":"",
+                    "related_fields":["graph"]
+                },
+                "expected": {
+                    "outcome": "Submission failed",
+                    "status": "Not Submitted"
+                }
+            }
+        ]
+    }, {
+        "usecase": {
+            "name": "Paper Review",
+            "scenario": "Reviewer reviews a paper.",
+            "actors": "Reviewer",
+            "preconditions": "User is assigned as a reviewer",
+            "steps": [
+                "Reviewer enters paper rating",
+                "Reviewer enters paper review",
+                "Reviewer submits the paper review"
+            ]
+        },
+        "testcases": [
+            {
+                "name": "Valid paper review Submission",
+                "description": "Verify that a reviewer has successfully submitted a paper review.",
+                "input": {
+                    "user_id" : "727691ed-07c2-4391-8b93-5df6ae307fad",
+                    "paper_id" : "7b3b5479-e7c9-4298-8432-07a95f34ef9b",
+                    "rating" : 7,
+                    "review" : "very very very One of the paper"
+                },
+                "expected": {
+                    "outcome": "Submission successful",
+                    "status": "Success"
+                }
+            },
+            {
+                "name": "Empty paper rating submission",
+                "description": "Verify that a reviewer has submitted a paper review without rating.",
+                "input": {
+                    "user_id" : "727691ed-07c2-4391-8b93-5df6ae307fad",
+                    "paper_id" : "7b3b5479-e7c9-4298-8432-07a95f34ef9b",
+                    "rating" : null,
+                    "review" : "very very very One of the paper"
+                },
+                "expected": {
+                    "outcome": "Submission failed",
+                    "status": "Failed"
+                }
+            },
+            {
+                "name": "Empty paper review submission",
+                "description": "Verify that a reviewer has submitted a paper review without review.",
+                "input": {
+                    "user_id" : "727691ed-07c2-4391-8b93-5df6ae307fad",
+                    "paper_id" : "7b3b5479-e7c9-4298-8432-07a95f34ef9b",
+                    "rating" : 6,
+                    "review" : ""
+                },
+                "expected": {
+                    "outcome": "Submission failed",
+                    "status": "Failed"
+                }
+            }
+        ]
+    }, {
+        "usecase": {
+            "name": "Reviewer assignment",
+            "scenario": "Conference Chair assign reviewrs in papers of a conference while satisfying constraints",
+            "actors": "Conference Chair",
+            "preconditions": "User is registered as conference chair in the website",
+            "steps": [
+                "Conference Chair enters conference page",
+                "Conference Chair selects reviewer from suggestions and request for review"
+            ]
+        },
+        "testcases": [
+            {
+                "name": "Valid Reviewer assignment",
+                "description": "Verify that system has successfuly asssigned reviewers while satisfying constraints.",
+                "input": {
+                    "paper_id" :"7b3b5479-e7c9-4298-8432-07a95f34ef9b",
+                    "user_id" : "727691ed-07c2-4391-8b93-5df6ae307fad"
+                },
+                "expected": {
+                    "outcome": "Assignment successful",
+                    "status": "Success"
+                }
+            },
+            {
+                "name": "Assinged reviewer is in conflict of interest",
+                "description": "Verify that the system handles the case where chair tries to assign reviewer who is in conflict of interest.",
+                "input": {
+                    "paper_id" :"7b3b5479-e7c9-4298-8432-07a95f34ef9b",
+                    "user_id" : "727691ed-07c2-4391-8b93-5df6ae307fad"
+                },
+                "expected": {
+                    "outcome": "Assignment failed",
+                    "status": "Failed"
+                }
+            },
+            {
+                "name": "Assinged reviewer is in co-authors",
+                "description": "Verify that the system handles the case where chair tries to assign reviewer who is a co-author.",
+                "input": {
+                    "paper_id" :"7b3b5479-e7c9-4298-8432-07a95f34ef9b",
+                    "user_id" : "727691ed-07c2-4391-8b93-5df6ae307fad"
+                },
+                "expected": {
+                    "outcome": "Assignment failed",
+                    "status": "Failed"
+                }
+            }
+            
+        ]
+    }, 
+    {
+        "usecase": {
+            "name": "View Published Papers",
+            "scenario": "Verify that a user can successfully view his/her own published papers.",
+            "actors": "Users",
+            "preconditions": "User is registered in the website",
+            "steps": [
+                "User enters his profile",
+                "User goes on published papers"
+            ]
+        },
+        "testcases": [
+            {
+                "name": "User views own published papers",
+                "description": "Verify that a user can successfully view his/her own published papers..",
+                "input": {
+                    "user_id" : "727691ed-07c2-4391-8b93-5df6ae307fad"
+                },
+                "expected": {
+                    "outcome": "Published papers viewed successfully",
+                    "status": "Allowed"
+                }
+            },
+            {
+                "name": "Conference chair views published papers",
+                "description": "Verify that an conference chair can successfully view published papers",
+                "input": {
+                    "conference_id": "A98765"
+                },
+                "expected": {
+                    "outcome": "Published papers viewed successfully",
+                    "access": "Allowed"
+                }
+            },
+            {
+                "name": "User views reviews on his submitted paper",
+                "description": "Verify that a user head can successfully view the reviews on his paper.",
+                "input": {
+                    "paper_id": "D45678"
+                },
+                "expected": {
+                    "outcome": "Reviews viewed successfully",
+                    "access": "Allowed"
+                }
+            },
+            {
+                "name": "Invalid user ID",
+                "description": "Verify that the system handles the case where an invalid user ID is provided for published papers viewing.",
+                "input": {
+                    "user_id": "InvalidID"
+                },
+                "expected": {
+                    "outcome": "Published paper viewing failed",
+                    "access": "Denied"
+                }
+            }
+            
+        ]
+    }
+]
