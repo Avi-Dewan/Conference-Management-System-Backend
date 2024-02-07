@@ -115,12 +115,12 @@ router.get('/:id', async (req, res) => {
 
 
 // workshops Table ( workshop_id, workshop_title, workshop_description, related_fields, workshop_duration, workshop_time, conference_id)
-// workshop_user Table (workshop_id, user_id, role("assigned", "requested", "normal"))
+// workshop_taker Table (workshop_id, user_id, role("assigned", "requested", "normal"))
 // user( first_name,last_name,date_of_birth,email,current_institution,personal_links,expertise)
 
 
 // Suggest users for a workshop based on related fields
-// edit: filter out those users whose role = assigned, requested in workshop_user table
+// edit: filter out those users whose role = assigned, requested in workshop_taker table
 router.post('/suggestTeachers', async (req, res) => {
   try {
     const { related_fields, workshop_id } = req.body;
@@ -128,7 +128,7 @@ router.post('/suggestTeachers', async (req, res) => {
 
     // Fetch all users who have been assigned or requested
     const { data: assignedOrRequestedUsers, error: assignedOrRequestedError } = await db
-      .from('workshop_user')
+      .from('workshop_taker')
       .select('user_id')
       .in('role', ['Assigned', 'Requested'])
       .eq('workshop_id', workshop_id);
