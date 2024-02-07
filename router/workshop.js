@@ -174,9 +174,44 @@ router.post('/suggestTeachers', async (req, res) => {
 });
 
 
+router.get('/interested/:conference_id/:user_id', async (req, res) => {
+  try {
+    const conference_id = req.params.conference_id;
+    const user_id = req.params.user_id;
+
+    // const conference_id = "73f16d7a-ccf1-4eb6-b815-85ed745d80d5";
+    // const user_id = "c86e4d14-5aef-463b-8fa3-a326a6a7a6c7";
+
+    const { data, error } = await db
+      .from('workshop_interested')
+      .select(`workshop_id , user_id , workshop(workshop_id , conference_id)`)
+      .eq('workshop.conference_id', conference_id)
+      .eq('user_id', user_id);
+
+      console.log("all data after joining");
+      console.log(data);
+
+      const transformed_data = data.map(({ workshop_id, user_id }) => ({ workshop_id, user_id }));
+
+      res.json(transformed_data);
+
+    if (error) {
+      throw error;
+    }
+
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 router.post('/interested/:conference_id', async (req, res) => {
   try {
     let workshop_id = req.body.workshop_id;
+
+    let user_id = req.body.user_id;
 
     // let workshop_id = "e63d4221-f3fb-45d2-b7cd-cea0f0b837c6";
 
@@ -199,10 +234,22 @@ router.post('/interested/:conference_id', async (req, res) => {
 
     let new_count;
     if(val === "1"){
-      new_count = 1
+      new_count = 1;
+
+      const { error } = await db
+      .from('workshop_interested')
+      .insert({ workshop_id: workshop_id, user_id: user_id })
+
+
     }
     else{
-      new_count = -1
+      new_count = -1;
+
+      const { error } = await db
+      .from('workshop_interested')
+      .delete()
+      .match({workshop_id:workshop_id , user_id:user_id})      
+
     }
 
     var {data, error} = await db
@@ -210,7 +257,7 @@ router.post('/interested/:conference_id', async (req, res) => {
     .update({ count:interest_count +new_count })
     .eq('workshop_id' , workshop_id);
 
-    res.status(201).json("interest count updated successfully");
+    res.status(201).json("success");
 
   } catch (error) {
     console.error(error.message);
