@@ -100,6 +100,102 @@ router.get("/:conference_id", async (req, res) => {
 });
 
 
+// Get all conferences of an user_id
+router.get("/:creator_id/all", async (req, res) => {
+  try {
+    const creator_id = req.params.creator_id;
+
+    const { data, error } = await db
+      .from('conferenceChair')
+      .select('conference_id'
+      
+      ).eq('user_id',creator_id)
+      
+
+    if (error) {
+      throw error;
+    }
+
+    let finalData = []
+
+    
+
+     
+     for(let k=0;k<data.length;k++)
+     {
+      
+
+        let result = {
+
+        conference_id : null,
+        conference_title : null,
+        submitted_paper_count : null,
+        
+        paper_count_with_no_reviewer_assigned: null,
+
+        paper_count_with_pending_review : null
+
+      }
+       
+       let conference_details =  (await db
+        .from('conference')
+        .select('conference_title').eq('conference_id',data[k].conference_id)).data
+
+       
+
+       let papers = (await db
+        .from('paper')
+        .select('paper_id,paper_title'
+        
+        ).eq('conference_id',data[k].conference_id)).data
+
+        result.conference_id = data[k].conference_id
+        result.conference_title = conference_details[0].conference_title
+
+        if(papers == null) result.submitted_paper_count = 0
+        else
+        result.submitted_paper_count = papers.length
+
+        let notAssignedCount = 0;
+
+        let pendingReviewCount = 0;
+        for(let i=0;i<papers.length;i++)
+        {
+            let assignedReviewer = (await db
+                .from('assignedReviewer')
+                .select('user_id,rating,review'
+                
+                ).eq('paper_id',papers[i].paper_id)).data
+
+                if(assignedReviewer == null || assignedReviewer.length == 0)
+                {
+                  notAssignedCount++;
+                }
+                
+                for(let z = 0; z<assignedReviewer.length;z++)
+                {
+                  if(assignedReviewer[z].rating == null && assignedReviewer[z].review == null)
+                  {
+                      pendingReviewCount++;
+                  }
+                }
+        }
+
+        result.paper_count_with_no_reviewer_assigned = notAssignedCount
+        result.paper_count_with_pending_review = pendingReviewCount
+
+        finalData.push(result)
+        
+    }
+
+    res.status(200).json(finalData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 // get conference paper details ( without authors)
 
