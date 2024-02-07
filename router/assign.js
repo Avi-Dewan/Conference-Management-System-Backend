@@ -39,15 +39,7 @@ router.get("/auto/:paper_id", async (req, res) => {
 
       already_assigned = [...temp_unique];
 
-      
-
-
-
-
-
-
-
-
+    
 
 
 
