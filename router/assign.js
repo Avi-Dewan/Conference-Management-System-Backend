@@ -3,6 +3,8 @@ const db = require('../db/database');  // Assuming you have a Supabase-compatibl
 
 const router = express.Router();
 
+const { v4: uuidv4 } = require('uuid');
+
 
 router.get("/auto/:paper_id", async (req, res) => {
   try {
@@ -387,14 +389,19 @@ router.post("/request", async (req, res) => {
 
     user_id = req.body.user_id
     paper_id = req.body.paper_id
+    paper_title = req.body.paper_title
     
     
+
+    let request_id = uuidv4();
+
     const { data, error } = await db
       .from('request')
       .insert([
         {
-          user_id,
-          paper_id
+          user_id : user_id,
+          paper_id : paper_id,
+          request_id : request_id
         },
       ]);
 
@@ -406,6 +413,46 @@ router.post("/request", async (req, res) => {
 
 
     res.status(201).json("Request sent");
+
+
+    let notification_JSON = {
+
+      type: 'reviewer_request',
+      requested_user_id : user_id,
+      requested_paper_id : paper_id,
+      requested_paper_title : paper_title
+    }
+
+    let notification_id = uuidv4()
+
+    let notification_body = "You are requested to review the following paper";
+
+    
+      await db
+      .from('notification')
+      .insert([
+        {
+          notification_id : notification_id,
+          notification_body : notification_body,
+          notification_json : notification_JSON,
+          user_id : user_id
+        },
+      ]);
+
+      await db
+      .from('requestNotification')
+      .insert([
+        {
+          request_id : request_id,
+          notification_id : notification_id,
+        },
+      ]);
+
+      
+
+    
+
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -486,6 +533,13 @@ router.post("/request_delete", async (req, res) => {
       .from('request')
       .delete()
       .match({"user_id":user_id , "paper_id":paper_id});
+
+      await db
+      .from('notification')
+      .delete()
+      .match({"user_id":user_id});
+
+
       res.status(201).json("deleted successfully");
 
     if (error) {

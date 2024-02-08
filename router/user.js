@@ -40,6 +40,24 @@ router.get("/:user_id", async (req, res) => {
   }
 });
 
+router.get("/getFullName/:user_id", async (req, res) => {
+  try {
+    const userId = req.params.user_id;
+
+    
+    const { data } = await db.from('user').select('first_name,last_name').eq('user_id', userId);
+    
+    if (data.length === 0) {
+      res.status(404).send('User not found');
+    } else {
+      res.json(data[0].first_name + ' ' + data[0].last_name);
+    }
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 // Delete user by user_id
 router.delete("/:user_id", async (req, res) => {
   try {

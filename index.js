@@ -21,6 +21,7 @@ const authRouter = require("./router/auth");
 const reviewerRouter = require("./router/reviewer");
 const requestRouter = require("./router/request");
 const workshopRouter = require("./router/workshop");
+const notificationRouter = require("./router/notification");
 
 
 app.use("/trial", trailRouter);
@@ -32,6 +33,7 @@ app.use("/auth", authRouter);
 app.use("/reviewer", reviewerRouter);
 app.use("/request", requestRouter);
 app.use("/workshop", workshopRouter);
+app.use("/notification", notificationRouter);
 
 
 

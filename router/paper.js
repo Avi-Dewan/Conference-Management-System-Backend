@@ -190,6 +190,35 @@ router.post("/submit", async (req, res) => {
     }
   });
 
+  router.get("/get_conference_chair/:paper_id", async (req, res) => { //retrieves paper info based on paper id
+    try {
+
+      const paper_id = req.params.paper_id;
+
+      let { data, error } = await db
+        .from('paper')
+        .select('conference_id')
+        .eq('paper_id', paper_id);
+  
+      if (error) {
+        throw error;
+      }
+
+      let conference_id = data[0].conference_id
+
+      
+      let chair_id = (await db
+        .from('conferenceChair')
+        .select('user_id')
+        .eq('conference_id', conference_id)).data;
+
+      res.status(200).json(chair_id[0].user_id);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
 
 
 
