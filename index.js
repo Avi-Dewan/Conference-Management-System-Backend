@@ -27,7 +27,7 @@ const reviewerRouter = require("./router/reviewer");
 const requestRouter = require("./router/request");
 const workshopRouter = require("./router/workshop");
 const notificationRouter = require("./router/notification");
-
+const mailRouter = require("./router/mail");
 
 app.use("/trial", trailRouter);
 app.use("/conference", conferenceRouter);
@@ -39,6 +39,7 @@ app.use("/reviewer", reviewerRouter);
 app.use("/request", requestRouter);
 app.use("/workshop", workshopRouter);
 app.use("/notification", notificationRouter);
+app.use("/mail", mailRouter);
 
 
 
