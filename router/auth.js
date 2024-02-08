@@ -1,7 +1,7 @@
 const express = require('express');
 const db = require('../db/database'); 
 const bcrypt = require('bcrypt');
-
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 // user table
@@ -100,13 +100,52 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Wrong Password!' });
     }
 
-    // You can return the user_id or any other relevant information
-    res.status(200).json({ user_id: authData.user_id, user_type: authData.user_type });
+    // Create a JWT token and send it to the user if the credentials are valid  
+    const token = jwt.sign({ user_id: authData.user_id}, process.env.JWT_SECRET_KEY);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    });
+
+    res.status(200).json({ message: 'User logged in successfully'});
+
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
   }
 });
+
+// authentification check
+router.get('/', async (req, res) => {
+  try {
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+      if (err) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      res.status(200).json({ user_id: user.user_id });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
+// Logout route
+router.post('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.status(200).json({ message: 'User logged out successfully' });
+});
+
+
 
 module.exports = router;
 
