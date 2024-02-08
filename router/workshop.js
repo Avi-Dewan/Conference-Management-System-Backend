@@ -303,6 +303,223 @@ router.post("/request", async (req, res) => {
 });
 
 
+router.get("/get_request/:user_id", async (req, res) => {
+  try {
+
+    const user_id = req.params.user_id;
+
+    console.log(user_id);
+
+
+
+    var { data, error } = await db //fetching data from paper table.
+      .from('workshop_request')
+      .select('*')
+      .eq('user_id', user_id); 
+
+    //   data = data.flat();
+
+    const workshopIds = [...new Set(data.map(item => item.workshop_id))];
+
+
+
+    console.log(workshopIds);
+
+    let workshop_info = [];
+    for(let i = 0; i<workshopIds.length; i++){
+
+        let wid = workshopIds[i];
+        var {data, error} = await db
+        .from('workshop')
+        .select('*')
+        .eq('workshop_id' , wid);
+
+
+        workshop_info.push(data);
+    }
+
+    workshop_info =  workshop_info.flat();
+    console.log(workshop_info);
+
+
+
+    //   console.log(data);
+
+    res.status(200).json(workshop_info);
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+router.post("/reject_request", async (req, res) => {
+  try {
+
+
+      let {user_id, workshop_id} = req.body;
+    
+
+    const { data, error } = await db
+      .from('workshop_request')
+      .delete()
+      .match({"user_id":user_id , "workshop_id":workshop_id});
+
+      
+      
+
+
+    res.status(201).json("deleted successfully");
+  } catch (error2) {
+    console.error(error2);
+    
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+  
+});
+
+
+router.post("/accept_request", async (req, res) => {
+  try {
+      const { user_id, workshop_id } = req.body;
+
+      // Insert data into paperReviewer table
+      const result = await db.from('assignedInstructor').insert([{ user_id, workshop_id }]);
+
+      res.status(200).json({ message: 'Workshop accepted successfully'});
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+router.get("/sent_request/:workshop_id", async (req, res) => {
+  try {
+
+     
+    const workshop_id = req.params.workshop_id;
+
+    // console.log(paper_id)
+
+    
+    //let paper_id = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
+    
+    
+    const { data, error } = await db
+      .from('workshop_request')
+      .select('*')
+      .eq("workshop_id",workshop_id);
+
+
+      const UserIds = [...new Set(data.map(item => item.user_id))];
+
+      let user_info = [];
+      for(let i = 0; i<UserIds.length; i++){
+  
+          let uid = UserIds[i];
+          const {data, error} = await db
+          .from('user')
+          .select('*')
+          .eq('user_id' , uid);
+
+          user_info.push(data);
+  
+          
+      }
+  
+      user_info =  user_info.flat();
+      console.log(user_info);
+
+      const output = user_info.map(user => {
+        const full_name = `${user.first_name} ${user.last_name}`;
+        return {
+          ...user,
+          full_name: full_name,
+        }
+      });
+
+
+    if (error) {
+      throw error;
+    }
+
+    console.log("does it come here");
+
+
+    res.status(201).json(output);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+router.get("/accepted_request/:workshop_id", async (req, res) => {
+  try {
+
+     
+    const workshop_id = req.params.workshop_id;
+
+    // console.log(paper_id)
+
+    
+    //let paper_id = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
+    
+    
+    const { data, error } = await db
+      .from('assignedInstructor')
+      .select('*')
+      .eq("workshop_id",workshop_id);
+
+
+      const UserIds = [...new Set(data.map(item => item.user_id))];
+
+      let user_info = [];
+      for(let i = 0; i<UserIds.length; i++){
+  
+          let uid = UserIds[i];
+          const {data, error} = await db
+          .from('user')
+          .select('*')
+          .eq('user_id' , uid);
+
+          user_info.push(data);
+  
+          
+      }
+  
+      user_info =  user_info.flat();
+      console.log(user_info);
+
+      const output = user_info.map(user => {
+        const full_name = `${user.first_name} ${user.last_name}`;
+        return {
+          ...user,
+          full_name: full_name,
+        }
+      });
+
+
+    if (error) {
+      throw error;
+    }
+
+    console.log("does it come here");
+
+
+    res.status(201).json(output);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 
 router.post("/updateData", async (req, res) => {
@@ -350,6 +567,9 @@ router.post("/updateData", async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+
 
 
 
@@ -525,6 +745,10 @@ router.post("/auto_suggest", async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+
+
 
 
 module.exports = router;
