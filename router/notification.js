@@ -27,6 +27,26 @@ router.get("/:user_id",async (req,res) =>
 
 });
 
+router.get("/single/:notification_id",async (req,res) => 
+{
+  try {
+      const notification_id = req.params.notification_id;
+      const { data, error } = await db
+        .from('notification')
+        .select('notification_id,notification_body,notification_json')
+        .eq('notification_id', notification_id);
+  
+      if (error) {
+        throw error;
+      }
+  
+      res.status(200).json(data);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+});
 
 router.post("/send",async (req,res) => 
 {
