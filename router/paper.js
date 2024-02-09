@@ -12,6 +12,46 @@ const { v4: uuidv4 } = require('uuid');
 const router = express.Router();
 
 
+router.get("/getConferenceInfo/:paper_id",async (req,res) =>   //retrives conference id,title and paper_title
+{
+  try {
+      const paper_id = req.params.paper_id;
+
+      let result = {
+        paper_title : null,
+        conference_id : null,
+        conference_title : null
+      };
+
+      const { data, error } = await db
+        .from('paper')
+        .select('paper_title,conference_id')
+        .eq('paper_id', paper_id);
+  
+      if (error) {
+        throw error;
+      }
+
+      result.paper_title = data[0].paper_title
+      result.conference_id = data[0].conference_id
+      
+
+        let conf_title = (await db
+        .from('conference')
+        .select('conference_title')
+        .eq('conference_id', result.conference_id)).data[0].conference_title;
+      
+      result.conference_title = conf_title
+      
+      res.status(200).json(result);
+      
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+});
+
 
 router.get("/:paper_id",async (req,res) => 
 {
@@ -41,7 +81,7 @@ router.get("/:paper_id/author",async (req,res) =>
       
       const { data, error } = await db
         .from('paperAuthor')
-        .select(`user(first_name,last_name,current_institution)`)
+        .select(`user(user_id,first_name,last_name,current_institution)`)
         
         .eq('paper_id', paper_id);
   
@@ -56,7 +96,7 @@ router.get("/:paper_id/author",async (req,res) =>
       
       for(let i=0;i<data.length;i++)
       {
-          returnData = [...returnData,{full_name: data[i].user.first_name + ' ' + data[i].user.last_name,current_institution : data[i].user.current_institution}]
+          returnData = [...returnData,{user_id: data[i].user_id, full_name: data[i].user.first_name + ' ' + data[i].user.last_name,current_institution : data[i].user.current_institution}]
       }
 
     
@@ -87,6 +127,20 @@ router.get("/all", async (req, res) => {
     }
   });
 
+
+router.post("/delete_submission", async (req, res) => {
+
+  let {paper_id} = req.body;
+
+  console.log(paper_id,"for delete")
+
+  const { data, error } = await db
+      .from('paper')
+      .delete()
+      .match({"paper_id":paper_id});
+
+
+});
 
 router.post("/submit", async (req, res) => {
     try {
@@ -133,6 +187,8 @@ router.post("/submit", async (req, res) => {
             pdf_link,
             related_fields,
             conference_id,
+            status:"pending"
+            
           },
         ]);
 
@@ -147,7 +203,7 @@ router.post("/submit", async (req, res) => {
           ([
               {
                   paper_id,
-                  user_id
+                  user_id,
               }
           ]
           );
@@ -169,10 +225,11 @@ router.post("/submit", async (req, res) => {
 
 
 
+
   router.get("/get_conference/:paper_id", async (req, res) => { //retrieves paper info based on paper id
     try {
 
-      const paper_id = "7b3b5479-e7c9-4298-8432-07a95f34ef9b";
+      let paper_id = req.params.paper_id;
 
       const { data, error } = await db
         .from('paper')
@@ -213,6 +270,100 @@ router.post("/submit", async (req, res) => {
         .eq('conference_id', conference_id)).data;
 
       res.status(200).json(chair_id[0].user_id);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+
+
+  router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retrieves paper info based on paper id
+    try {
+
+      const user_id = req.params.user_id;
+      const conference_id = req.params.conference_id;
+
+      let { data, error } = (await db
+        .from('paper')
+        .select('paperAuthor(paper_id,user_id)')
+        .eq('conference_id', conference_id));
+  
+      if (error) {
+        throw error;
+      }
+
+      let paper_ids = []
+
+      let author_ids = []
+
+      for(let i=0;i<data.length;i++)
+      {
+         let temp = data[i].paperAuthor
+
+        for(let j=0;j<temp.length;j++)
+        {
+           if(temp[j].user_id == user_id)
+           {
+            paper_ids.push(temp[j].paper_id)
+           }
+        }
+      }
+
+      let myPapers = []
+      for(let i=0;i<paper_ids.length;i++)
+      {
+
+
+        let paper_details = (await db
+        .from('paper')
+        .select('*')
+        .eq('paper_id', paper_ids[i])).data[0];
+
+        let author_details = (await db
+        .from('paperAuthor')
+        .select(`user(user_id,first_name,last_name,current_institution)`)
+        
+        .eq('paper_id', paper_ids[i])).data;
+        
+
+        let author_json = {
+          author_id : null,
+          author_full_name : null
+        }
+
+        let authors = []
+        
+        for(let l=0;l<author_details.length;l++)
+        {
+          let author_id = author_details[l].user.user_id
+          let author_full_name = author_details[l].user.first_name+' ' + author_details[l].user.last_name
+
+          authors.push({author_id: author_id,full_name: author_full_name})
+
+        }
+
+        
+
+        paper_details.authors = authors
+
+        myPapers.push(paper_details)
+
+         
+      }
+
+
+      
+
+      // let conference_id = data[0].conference_id
+
+      
+      // let chair_id = (await db
+      //   .from('conferenceChair')
+      //   .select('user_id')
+      //   .eq('conference_id', conference_id)).data;
+
+      res.status(200).json(myPapers);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
