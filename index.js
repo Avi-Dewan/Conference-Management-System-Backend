@@ -27,7 +27,9 @@ const reviewerRouter = require("./router/reviewer");
 const requestRouter = require("./router/request");
 const workshopRouter = require("./router/workshop");
 const notificationRouter = require("./router/notification");
-const mailRouter = require("./router/mail");const authorRouter = require("./router/author");
+const mailRouter = require("./router/mail");
+const authorRouter = require("./router/author");
+const chairRouter = require("./router/chair");
 
 
 app.use("/trial", trailRouter);
@@ -42,6 +44,7 @@ app.use("/workshop", workshopRouter);
 app.use("/notification", notificationRouter);
 app.use("/mail", mailRouter);
 app.use("/author",authorRouter);
+app.use("/chair",chairRouter);
 
 
 

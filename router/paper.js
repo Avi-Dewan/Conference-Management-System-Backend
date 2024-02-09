@@ -285,18 +285,19 @@ router.get("/get_conference_chair/:paper_id", async (req, res) => { //retrieves 
 
     let conference_id = data[0].conference_id
 
-    
-    let chair_id = (await db
-      .from('conferenceChair')
-      .select('user_id')
-      .eq('conference_id', conference_id)).data;
-
-    res.status(200).json(chair_id[0].user_id);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
+      
+      let chair_id = (await db
+        .from('conferenceChair')
+        .select('user_id')
+        .eq('conference_id', conference_id)).data;
+      
+      
+      res.status(200).json(chair_id[0].user_id);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 
 
