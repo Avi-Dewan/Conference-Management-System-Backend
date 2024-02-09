@@ -95,19 +95,27 @@ router.get('/popular/:conference_id', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const workshopId = req.params.id;
+    console.log("je id diye check kora hbe")
+    console.log(workshopId)
     const { data, error } = await db
       .from('workshop')
       .select('*')
       .eq('workshop_id', workshopId);
+    
+    console.log("workshop details print korte cahcchi")
+    console.log(data)
 
     if (error) {
       throw error;
     }
 
     if (data.length === 0) {
+      console.log("workshop not found")
       res.status(404).send('Workshop not found');
     } else {
-      res.json(data[0]);
+      console.log("workshop found")
+      console.log(data[0])
+      res.json(data);
     }
   } catch (error) {
     console.error(error.message);
@@ -292,7 +300,7 @@ router.post("/request", async (req, res) => {
       throw error;
     }
 
-    console.log("does it come here");
+    // console.log("does it come here");
 
 
     res.status(201).json("Request sent");
@@ -381,6 +389,33 @@ router.post("/reject_request", async (req, res) => {
 });
 
 
+
+router.post("/request_delete", async (req, res) => {
+  try {
+    
+    const workshop_id = req.body.workshop_id;
+
+    const user_id = req.body.user_id;
+    
+    // console.log(paper_id,user_id,"delete")
+
+    const { data, error } = await db
+      .from('workshop_request')
+      .delete()
+      .match({"user_id":user_id , "workshop_id":workshop_id});
+      res.status(201).json("deleted successfully");
+
+    if (error) {
+      throw error;
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 router.post("/accept_request", async (req, res) => {
   try {
       const { user_id, workshop_id } = req.body;
@@ -447,7 +482,7 @@ router.get("/sent_request/:workshop_id", async (req, res) => {
       throw error;
     }
 
-    console.log("does it come here");
+    // console.log("does it come here");
 
 
     res.status(201).json(output);
@@ -509,7 +544,7 @@ router.get("/accepted_request/:workshop_id", async (req, res) => {
       throw error;
     }
 
-    console.log("does it come here");
+    // console.log("does it come here");
 
 
     res.status(201).json(output);
@@ -558,7 +593,7 @@ router.post("/updateData", async (req, res) => {
       throw error;
     }
 
-    console.log("does it come here");
+    // console.log("does it come here");
 
 
     res.status(201).json("Request sent");
@@ -575,12 +610,13 @@ router.post("/updateData", async (req, res) => {
 
 
 
-router.post("/auto_suggest", async (req, res) => {
+router.get("/auto_suggest/:workshop_id", async (req, res) => {
   try {
 
-     const workshop_id = req.body.workshop_id;
+    console.log("workshop er autosuggestion")
+    const workshop_id = req.params.workshop_id;
 
-     console.log(workshop_id);
+    console.log(workshop_id);
 
     
     var already_assigned = [];
