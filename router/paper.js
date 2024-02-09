@@ -119,7 +119,7 @@ router.post("/submit", async (req, res) => {
       {
         author_id_arr = [...author_id_arr,co_authors[i].user_id]
       }
-      author_id_arr = [main_author_id, ... author_id_arr]
+      // author_id_arr = [main_author_id, ... author_id_arr]
 
 
   
@@ -142,7 +142,7 @@ router.post("/submit", async (req, res) => {
         {
           user_id = author_id_arr[i];
           const {data2 , error2} = await db
-          .from('paperAuthor')
+          .from('author_request')
           .insert
           ([
               {
@@ -157,6 +157,27 @@ router.post("/submit", async (req, res) => {
           throw error;
         }
       }
+
+
+      user_id = main_author_id;
+      const {data3 , error3} = await db
+      .from('paperAuthor')
+      .insert
+      ([
+          {
+              paper_id,
+              user_id
+          }
+      ]
+      );
+    
+
+      if ( error3) {
+        throw error;
+      }
+
+
+
 
       res.status(201).json("Paper created successfully");
     } catch (error2) {
