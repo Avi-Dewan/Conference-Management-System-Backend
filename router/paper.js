@@ -3,6 +3,7 @@ const express = require('express');
 const db = require('../db/database'); 
 
 const { v4: uuidv4 } = require('uuid');
+const e = require('express');
 
 
 
@@ -247,149 +248,186 @@ router.post("/submit", async (req, res) => {
 
 
 
-  router.get("/get_conference/:paper_id", async (req, res) => { //retrieves paper info based on paper id
-    try {
+router.get("/get_conference/:paper_id", async (req, res) => { //retrieves paper info based on paper id
+  try {
 
-      let paper_id = req.params.paper_id;
+    let paper_id = req.params.paper_id;
 
-      const { data, error } = await db
-        .from('paper')
-        .select('*')
-        .eq('paper_id', paper_id);
-  
-      if (error) {
-        throw error;
-      }
-  
-      res.status(200).json(data);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    const { data, error } = await db
+      .from('paper')
+      .select('*')
+      .eq('paper_id', paper_id);
+
+    if (error) {
+      throw error;
     }
-  });
 
-  router.get("/get_conference_chair/:paper_id", async (req, res) => { //retrieves paper info based on paper id
-    try {
+    res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
-      const paper_id = req.params.paper_id;
+router.get("/get_conference_chair/:paper_id", async (req, res) => { //retrieves paper info based on paper id
+  try {
 
-      let { data, error } = await db
-        .from('paper')
-        .select('conference_id')
-        .eq('paper_id', paper_id);
-  
-      if (error) {
-        throw error;
+    const paper_id = req.params.paper_id;
+
+    let { data, error } = await db
+      .from('paper')
+      .select('conference_id')
+      .eq('paper_id', paper_id);
+
+    if (error) {
+      throw error;
+    }
+
+    let conference_id = data[0].conference_id
+
+    
+    let chair_id = (await db
+      .from('conferenceChair')
+      .select('user_id')
+      .eq('conference_id', conference_id)).data;
+
+    res.status(200).json(chair_id[0].user_id);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retrieves paper info based on paper id
+  try {
+
+    const user_id = req.params.user_id;
+    const conference_id = req.params.conference_id;
+
+    let { data, error } = (await db
+      .from('paper')
+      .select('paperAuthor(paper_id,user_id)')
+      .eq('conference_id', conference_id));
+
+    if (error) {
+      throw error;
+    }
+
+    let paper_ids = []
+
+    let author_ids = []
+
+    for(let i=0;i<data.length;i++)
+    {
+        let temp = data[i].paperAuthor
+
+      for(let j=0;j<temp.length;j++)
+      {
+          if(temp[j].user_id == user_id)
+          {
+          paper_ids.push(temp[j].paper_id)
+          }
+      }
+    }
+
+    let myPapers = []
+    for(let i=0;i<paper_ids.length;i++)
+    {
+
+
+      let paper_details = (await db
+      .from('paper')
+      .select('*')
+      .eq('paper_id', paper_ids[i])).data[0];
+
+      let author_details = (await db
+      .from('paperAuthor')
+      .select(`user(user_id,first_name,last_name,current_institution)`)
+      
+      .eq('paper_id', paper_ids[i])).data;
+      
+
+      let author_json = {
+        author_id : null,
+        author_full_name : null
       }
 
-      let conference_id = data[0].conference_id
+      let authors = []
+      
+      for(let l=0;l<author_details.length;l++)
+      {
+        let author_id = author_details[l].user.user_id
+        let author_full_name = author_details[l].user.first_name+' ' + author_details[l].user.last_name
+
+        authors.push({author_id: author_id,full_name: author_full_name})
+
+      }
 
       
-      let chair_id = (await db
-        .from('conferenceChair')
-        .select('user_id')
-        .eq('conference_id', conference_id)).data;
 
-      res.status(200).json(chair_id[0].user_id);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      paper_details.authors = authors
+
+      myPapers.push(paper_details)
+
+        
     }
-  });
 
 
+    
 
-  router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retrieves paper info based on paper id
+    // let conference_id = data[0].conference_id
+
+    
+    // let chair_id = (await db
+    //   .from('conferenceChair')
+    //   .select('user_id')
+    //   .eq('conference_id', conference_id)).data;
+
+    res.status(200).json(myPapers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+  // PaperAuthor(user_id,paper_id), Paper(paper_id,paper_title,abstract,related_fields,conference_id), Conference(conference_id,conference_title
+  router.get("/allPapers/:user_id", async (req, res) => {
     try {
-
+      // get all the papers of a user
       const user_id = req.params.user_id;
-      const conference_id = req.params.conference_id;
-
-      let { data, error } = (await db
-        .from('paper')
-        .select('paperAuthor(paper_id,user_id)')
-        .eq('conference_id', conference_id));
   
-      if (error) {
-        throw error;
-      }
-
-      let paper_ids = []
-
-      let author_ids = []
-
-      for(let i=0;i<data.length;i++)
-      {
-         let temp = data[i].paperAuthor
-
-        for(let j=0;j<temp.length;j++)
-        {
-           if(temp[j].user_id == user_id)
-           {
-            paper_ids.push(temp[j].paper_id)
-           }
-        }
-      }
-
-      let myPapers = []
-      for(let i=0;i<paper_ids.length;i++)
-      {
-
-
-        let paper_details = (await db
-        .from('paper')
-        .select('*')
-        .eq('paper_id', paper_ids[i])).data[0];
-
-        let author_details = (await db
+      const { data, error } = await db
         .from('paperAuthor')
-        .select(`user(user_id,first_name,last_name,current_institution)`)
-        
-        .eq('paper_id', paper_ids[i])).data;
-        
-
-        let author_json = {
-          author_id : null,
-          author_full_name : null
-        }
-
-        let authors = []
-        
-        for(let l=0;l<author_details.length;l++)
-        {
-          let author_id = author_details[l].user.user_id
-          let author_full_name = author_details[l].user.first_name+' ' + author_details[l].user.last_name
-
-          authors.push({author_id: author_id,full_name: author_full_name})
-
-        }
-
-        
-
-        paper_details.authors = authors
-
-        myPapers.push(paper_details)
-
-         
+        .select('paper_id')
+        .eq('user_id', user_id);
+  
+      if (error) {  
+        throw error;
+      } else { 
+  
+        const papers = await Promise.all(data.map(async (data_instance) => {
+          const { data: paper, error } = await db 
+            .from('paper')
+            .select('*')
+            .eq('paper_id', data_instance.paper_id);
+          
+          if (error) {
+            throw error;
+          }
+  
+          return paper[0]; 
+        }));
+  
+        res.status(200).json(papers);
       }
-
-
-      
-
-      // let conference_id = data[0].conference_id
-
-      
-      // let chair_id = (await db
-      //   .from('conferenceChair')
-      //   .select('user_id')
-      //   .eq('conference_id', conference_id)).data;
-
-      res.status(200).json(myPapers);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error(error.message);
+      res.status(500).send('Internal Server Error');
     }
-  });
+  });;
+
 
 
 
