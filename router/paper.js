@@ -289,7 +289,8 @@ router.post("/submit", async (req, res) => {
         .from('conferenceChair')
         .select('user_id')
         .eq('conference_id', conference_id)).data;
-
+      
+      
       res.status(200).json(chair_id[0].user_id);
     } catch (error) {
       console.error(error);

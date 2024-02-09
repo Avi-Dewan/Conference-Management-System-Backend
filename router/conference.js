@@ -1,17 +1,21 @@
 const express = require('express');
 const db = require('../db/database');  // Assuming you have a Supabase-compatible database object
-
+const { v4: uuidv4 } = require('uuid');
 const router = express.Router();
 
 // Create a new conference
 router.post("/create", async (req, res) => {
   try {
-    const { conference_title, conference_description, conference_webpage, venue,  start_date, end_date, submission_deadline, related_fields } = req.body;
+    const { conference_title, conference_description, conference_webpage, venue,  start_date, end_date, submission_deadline, related_fields, chair_id } = req.body;
+
+
+    let conference_id = uuidv4();
 
     const { data, error } = await db
       .from('conference')
       .insert([
         {
+          conference_id : conference_id,
           conference_title,
           conference_description,
           venue,
@@ -27,11 +31,26 @@ router.post("/create", async (req, res) => {
       throw error;
     }
 
+     await db
+      .from('conferenceChair')
+      .insert([
+        {
+          user_id : chair_id,
+          conference_id : conference_id
+
+
+        }]);
+
+
     res.status(201).json("Conference created successfully");
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+
+ 
+
+
 });
 
 // Get all conferences
