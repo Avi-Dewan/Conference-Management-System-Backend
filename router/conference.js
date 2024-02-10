@@ -88,7 +88,8 @@ router.get("/open", async (req, res) => {
       const submissionDeadline = new Date(`${conference.submission_deadline.date}T${conference.submission_deadline.time}`);
       return (currentDate < submissionDeadline) && (conference.status = 'Open');
     });
-    console.log(openConferences)
+
+    // console.log(openConferences)
     res.status(200).json(openConferences);
   } catch (error) {
     console.error(error);

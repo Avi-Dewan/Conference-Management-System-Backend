@@ -36,10 +36,10 @@ router.post('/', async (req, res) => {
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        console.log(error);
+        // console.log(error);
         return res.status(500).json({ error: "Email could not be sent" });
       } else {
-        console.log("Email sent: " + info.response);
+        // console.log("Email sent: " + info.response);
         return res.status(200).json({ message: "Email send successfully" });
       }
     });

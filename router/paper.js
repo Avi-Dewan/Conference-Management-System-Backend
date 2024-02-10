@@ -133,7 +133,7 @@ router.post("/delete_submission", async (req, res) => {
 
   let {paper_id} = req.body;
 
-  console.log(paper_id,"for delete")
+  // console.log(paper_id,"for delete")
 
   const { data, error } = await db
       .from('paper')
@@ -166,7 +166,7 @@ router.post("/submit", async (req, res) => {
       
       paper_id = uuidv4();
 
-      console.log(req.body)
+      // console.log(req.body)
       
       
       let author_id_arr = []
@@ -343,12 +343,18 @@ router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retr
       .select('*')
       .eq('paper_id', paper_ids[i])).data[0];
 
-      let author_details = (await db
-      .from('paperAuthor')
-      .select(`user(user_id,first_name,last_name,current_institution)`)
-      
-      .eq('paper_id', paper_ids[i])).data;
-      
+        let author_details = (await db
+        .from('paperAuthor')
+        .select(`user(user_id,first_name,last_name,current_institution)`)
+        .eq('paper_id', paper_ids[i])).data;
+
+        let review_details = (await db
+        .from ('assignedReviewer')
+        .select('*')
+        .eq('paper_id', paper_ids[i])).data;
+
+        // console.log("reviwer details")
+        // console.log(review_details)
 
       let author_json = {
         author_id : null,
@@ -364,11 +370,29 @@ router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retr
 
         authors.push({author_id: author_id,full_name: author_full_name})
 
-      }
+        }
+
+        let reviews = []
+
+        // console.log("review loop printing")
+        for(let l = 0; l<review_details.length ; l++)
+        {
+          let rating = review_details[l].rating;
+          let review = review_details[l].review;
+          reviews.push({rating: rating , review:review})
+          
+          // console.log(rating);
+          // console.log(review);
+        }
 
       
 
-      paper_details.authors = authors
+        paper_details.authors = authors
+
+        paper_details["reviews"] = reviews
+
+        // console.log("paper details printing")
+        // console.log(paper_details)
 
       myPapers.push(paper_details)
 

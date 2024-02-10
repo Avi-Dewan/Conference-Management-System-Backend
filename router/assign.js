@@ -11,7 +11,7 @@ router.get("/auto/:paper_id", async (req, res) => {
 
      const paper_id = req.params.paper_id;
 
-    console.log(paper_id)
+    // console.log(paper_id)
 
    
 
@@ -54,8 +54,8 @@ router.get("/auto/:paper_id", async (req, res) => {
 
     related_fields = related_fields.flat(); // flattening the array to get rid of annoying [] 's
 
-    console.log("RELATED fields");
-    console.log(related_fields);
+    // console.log("RELATED fields");
+    // console.log(related_fields);
 
 
 
@@ -69,8 +69,8 @@ router.get("/auto/:paper_id", async (req, res) => {
 
     authors = authors.flat(); // similar to previous one
 
-    console.log("author id");
-    console.log(authors);
+    // console.log("author id");
+    // console.log(authors);
 
 
     var {data, error} = await db // all user info are extracted
@@ -89,8 +89,8 @@ router.get("/auto/:paper_id", async (req, res) => {
     thus we  get an array of author's institutions
     */
 
-    console.log("related institution");
-    console.log(related_institution);
+    // console.log("related institution");
+    // console.log(related_institution);
 
     var possible_user_id = all_expertise.filter(user => {
         return related_fields.some(keyword => user.expertise.includes(keyword));
@@ -103,8 +103,8 @@ router.get("/auto/:paper_id", async (req, res) => {
     Any value that is in related_fields will be inside the possible_user_id
     */
 
-    console.log("possible user id");
-    console.log(possible_user_id);
+    // console.log("possible user id");
+    // console.log(possible_user_id);
 
 
     possible_user_id = possible_user_id.filter(user =>  !related_institution.includes(user.current_institution));
@@ -147,7 +147,7 @@ router.get("/auto/:paper_id", async (req, res) => {
 
         
 
-        console.log(actual_reviewer_id)
+        // console.log(actual_reviewer_id)
 
         
         for(let i = 0; i<actual_reviewer_id.length;i++)
@@ -231,9 +231,9 @@ router.get("/manual/:paper_id", async (req, res) => {
 
       // already_assigned = [];
 
-      console.log("already assigned");
+      // console.log("already assigned");
 
-      console.log(already_assigned);
+      // console.log(already_assigned);
 
 
 
@@ -247,8 +247,8 @@ router.get("/manual/:paper_id", async (req, res) => {
 
     related_fields = related_fields.flat(); // flattening the array to get rid of annoying [] 's
 
-    console.log("RELATED fields");
-    console.log(related_fields);
+    // console.log("RELATED fields");
+    // console.log(related_fields);
 
 
 
@@ -262,8 +262,8 @@ router.get("/manual/:paper_id", async (req, res) => {
 
     authors = authors.flat(); // similar to previous one
 
-    console.log("author id");
-    console.log(authors);
+    // console.log("author id");
+    // console.log(authors);
 
 
     var {data, error} = await db // all user info are extracted
@@ -294,8 +294,8 @@ router.get("/manual/:paper_id", async (req, res) => {
     Any value that is in related_fields will be inside the possible_user_id
     */
 
-    console.log("possible user id");
-    console.log(possible_user_id);
+    // console.log("possible user id");
+    // console.log(possible_user_id);
 
 
     // possible_user_id = possible_user_id.filter(user =>  !related_institution.includes(user.current_institution));
@@ -323,7 +323,7 @@ router.get("/manual/:paper_id", async (req, res) => {
     
     if(actual_reviewer_id.length === 0){ // to check if there is any reviewer or not
         
-      console.log("is empty");
+      // console.log("is empty");
       res.status(200).json(allAuthorName);
     }
     else{
@@ -331,7 +331,7 @@ router.get("/manual/:paper_id", async (req, res) => {
 
         
 
-        console.log(actual_reviewer_id)
+        // console.log(actual_reviewer_id)
 
         
         for(let i = 0; i<actual_reviewer_id.length;i++)
@@ -401,7 +401,7 @@ router.post("/request", async (req, res) => {
       throw error;
     }
 
-    console.log("does it come here");
+    // console.log("does it come here");
 
 
     res.status(201).json("Request sent");
@@ -458,7 +458,7 @@ router.get("/sent_request/:paper_id", async (req, res) => {
      
     const paper_id = req.params.paper_id;
 
-    console.log(paper_id)
+    // console.log(paper_id)
 
     
     //let paper_id = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
@@ -487,7 +487,7 @@ router.get("/sent_request/:paper_id", async (req, res) => {
       }
   
       user_info =  user_info.flat();
-      console.log(user_info);
+      // console.log(user_info);
 
       const output = user_info.map(user => {
         const full_name = `${user.first_name} ${user.last_name}`;
@@ -502,7 +502,7 @@ router.get("/sent_request/:paper_id", async (req, res) => {
       throw error;
     }
 
-    console.log("does it come here");
+    // console.log("does it come here");
 
 
     res.status(201).json(output);
@@ -519,7 +519,7 @@ router.post("/request_delete", async (req, res) => {
 
     const user_id = req.body.user_id;
     
-    console.log(paper_id,user_id,"delete")
+    // console.log(paper_id,user_id,"delete")
 
     const { data, error } = await db
       .from('request')

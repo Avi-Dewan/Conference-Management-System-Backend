@@ -9,7 +9,7 @@ router.get("/get_request/:user_id", async (req, res) => {
   
       const user_id = req.params.user_id;
   
-      console.log(user_id);
+      // console.log(user_id);
   
   
   
@@ -24,7 +24,7 @@ router.get("/get_request/:user_id", async (req, res) => {
   
   
   
-      console.log(paperIds);
+      // console.log(paperIds);
   
       let paper_info = [];
       for(let i = 0; i<paperIds.length; i++){
@@ -40,7 +40,8 @@ router.get("/get_request/:user_id", async (req, res) => {
       }
   
       paper_info =  paper_info.flat();
-      console.log(paper_info);
+     
+      // console.log(paper_info);
   
   
   
