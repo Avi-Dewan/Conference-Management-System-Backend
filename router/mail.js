@@ -11,9 +11,8 @@ dotenv.config();
 
 router.post('/', async (req, res) => {
 
-  const {email, notification_id} = req.body;
+  const {email, message,  notification_id} = req.body;
 
-    // Send the PIN to the user's email
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {

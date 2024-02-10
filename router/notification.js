@@ -3,6 +3,12 @@ const db = require('../db/database');
 
 const { v4: uuidv4 } = require('uuid');
 
+const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+
 const router = express.Router();
 
 
@@ -59,6 +65,8 @@ router.post("/send",async (req,res) =>
 
       let notification_id = uuidv4();
 
+      console.log("Sending notification");
+
       const { data, error } = await db
         .from('notification')
         .insert([
@@ -69,6 +77,44 @@ router.post("/send",async (req,res) =>
       
         ])
 
+      console.log("Sending email");
+        
+      const { data:user } = await db.from('user').select('*').eq('user_id', user_id).single();
+
+      const transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+          user: `${process.env.DB_GMAIL}`,
+          pass: `${process.env.DB_GMAIL_PASSWORD}`,
+        },
+      });
+  
+  
+      const mailOptions = {
+        from: process.env.DB_GMAIL,
+        to: user.email,
+        subject: "You got a new notification from Conference Management System",
+        html: `
+        <h1>Notification: </h1>
+        <p>${notification_body}</p>
+        <br>
+        Click <a href="http://localhost:5173/login/${notification_id} style="background-color: 
+        blue; color: white; padding: 10px 20px; text-decoration: none;">here</a> to view the notification.
+    `,
+      };
+  
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+          return res.status(500).json({ error: "Email could not be sent" });
+        } else {
+          console.log("Email sent: " + info.response);
+          return res.status(200).json({ message: "Email send successfully" });
+        }
+      });
+
+
+      
   
       res.status(200).json({success: "success"});
     } catch (error) {
