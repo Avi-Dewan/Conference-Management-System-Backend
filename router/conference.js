@@ -120,6 +120,32 @@ router.get("/:conference_id", async (req, res) => {
 });
 
 
+
+// Get a specific chair id
+router.get("/conference_chair/:conference_id", async (req, res) => {
+  try {
+    const conference_id = req.params.conference_id;
+
+    const { data, error } = await db
+      .from('conferenceChair')
+      .select('*')
+      .eq('conference_id', conference_id);
+
+    if (error) {
+      throw error;
+    }
+
+    console.log("chair id pathacchi")
+    console.log(data[0])
+
+    res.status(200).json(data[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 // Get all conferences of an user_id
 router.get("/:creator_id/all", async (req, res) => {
   try {
