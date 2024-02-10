@@ -98,7 +98,7 @@ router.post("/send",async (req,res) =>
         <h1>Notification: </h1>
         <p>${notification_body}</p>
         <br>
-        Click <a href="http://localhost:5173/login/${notification_id} style="background-color: 
+        Click <a href="http://localhost:5173/login/${notification_id}" style="background-color: 
         blue; color: white; padding: 10px 20px; text-decoration: none;">here</a> to view the notification.
     `,
       };
