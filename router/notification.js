@@ -12,14 +12,18 @@ dotenv.config();
 const router = express.Router();
 
 
+// notifiction ( notification_id,notification_body, notification_json, notification_time, notification_status, user_id)
+
 router.get("/:user_id",async (req,res) => 
 {
   try {
       const user_id = req.params.user_id;
       const { data, error } = await db
         .from('notification')
-        .select('notification_id,notification_body,notification_json')
-        .eq('user_id', user_id);
+        .select('notification_id, notification_body, notification_json, notification_time, notification_status', 'notification_time')
+        .eq('user_id', user_id)
+        .order('notification_status', { ascending: false })
+        .order('notification_time', { ascending: false });
   
       if (error) {
         throw error;
@@ -125,4 +129,23 @@ router.post("/send",async (req,res) =>
 
 });
 
-module.exports = router
+// 
+router.put("/update_status/:notification_id",async (req,res) =>
+{
+  try {
+    const notification_id = req.params.notification_id;
+    const { data, error } = await db
+      .from('notification')
+      .update({notification_status:"read"})
+      .match({notification_id:notification_id});
+    if (error) {
+      throw error;
+    }
+    res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+} );
+
+module.exports = router;
