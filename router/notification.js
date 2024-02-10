@@ -33,14 +33,15 @@ router.get("/:user_id",async (req,res) =>
 
 });
 
-router.get("/single/:notification_id",async (req,res) => 
+router.get("/single/:notification_id/:user_id",async (req,res) => 
 {
   try {
       const notification_id = req.params.notification_id;
+      const user_id = req.params.user_id;
       const { data, error } = await db
         .from('notification')
         .select('notification_id,notification_body,notification_json')
-        .eq('notification_id', notification_id);
+        .match({"notification_id":notification_id , "user_id":user_id});
   
       if (error) {
         throw error;
