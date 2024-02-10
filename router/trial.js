@@ -134,7 +134,7 @@ router.post('/sendMail', async (req, res) => {
       html: `
       <h1>Welcome to Conference Management System</h1>
       <p>${message}</p>
-      <a href="https://www.ggogle.com" style="background-color: 
+      <a href="http://localhost:5173/abbd48c0-5f86-4798-b362-c33a674f13d3/Request" style="background-color: 
       blue; color: white; padding: 10px 20px; text-decoration: none;">Click Me</a>
   `,
     };
