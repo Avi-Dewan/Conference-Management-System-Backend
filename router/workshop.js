@@ -10,7 +10,9 @@ router.post("/create", async (req, res) => {
   try {
     const { workshop_title, workshop_description,related_fields,workshop_duration,conference_id} = req.body;
 
-    console.log(req.body)
+    // console.log(req.body)
+
+
     const { data, error } = await db
       .from('workshop')
       .insert([
@@ -76,14 +78,18 @@ router.get('/popular/:conference_id', async (req, res) => {
       throw error;
     }
 
-    console.log("popular list");
+    // console.log("popular list");
     
 
     data.sort(((a, b) => b.count - a.count));
-    console.log(data);
+
+    // console.log(data);
+   
     res.json(data);
   } catch (error) {
-    console.error(error.message);
+
+    // console.error(error.message);
+    
     res.status(500).send('Internal Server Error');
   }
 });
@@ -95,26 +101,33 @@ router.get('/popular/:conference_id', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const workshopId = req.params.id;
-    console.log("je id diye check kora hbe")
-    console.log(workshopId)
+
+    // console.log("je id diye check kora hbe")
+    // console.log(workshopId)
+    
+    
     const { data, error } = await db
       .from('workshop')
       .select('*')
       .eq('workshop_id', workshopId);
     
-    console.log("workshop details print korte cahcchi")
-    console.log(data)
+    // console.log("workshop details print korte cahcchi")
+    // console.log(data)
 
     if (error) {
       throw error;
     }
 
     if (data.length === 0) {
-      console.log("workshop not found")
+
+      // console.log("workshop not found")
+      
       res.status(404).send('Workshop not found');
     } else {
-      console.log("workshop found")
-      console.log(data[0])
+
+      // console.log("workshop found")
+      // console.log(data[0])
+
       res.json(data);
     }
   } catch (error) {
@@ -176,8 +189,8 @@ router.post('/suggestTeachers', async (req, res) => {
 
     suggestedUsers = Array.from(suggestedUsers).map(user => JSON.parse(user));
 
-    console.log("suggested users")
-    console.log(suggestedUsers);
+    // console.log("suggested users")
+    // console.log(suggestedUsers);
 
     res.json(suggestedUsers);
   } catch (error) {
@@ -201,8 +214,8 @@ router.get('/interested/:conference_id/:user_id', async (req, res) => {
       .eq('workshop.conference_id', conference_id)
       .eq('user_id', user_id);
 
-      console.log("all data after joining");
-      console.log(data);
+      // console.log("all data after joining");
+      // console.log(data);
 
       const transformed_data = data.map(({ workshop_id, user_id }) => ({ workshop_id, user_id }));
 
@@ -240,7 +253,8 @@ router.post('/interested/:conference_id', async (req, res) => {
 
 
 
-    console.log("count hocche");
+    // console.log("count hocche");
+
     let interest_count = data[0].count;
 
     // console.log(interest_count);
@@ -316,7 +330,7 @@ router.get("/get_request/:user_id", async (req, res) => {
 
     const user_id = req.params.user_id;
 
-    console.log(user_id);
+    // console.log(user_id);
 
 
 
@@ -331,7 +345,7 @@ router.get("/get_request/:user_id", async (req, res) => {
 
 
 
-    console.log(workshopIds);
+    // console.log(workshopIds);
 
     let workshop_info = [];
     for(let i = 0; i<workshopIds.length; i++){
@@ -347,7 +361,9 @@ router.get("/get_request/:user_id", async (req, res) => {
     }
 
     workshop_info =  workshop_info.flat();
-    console.log(workshop_info);
+
+
+    // console.log(workshop_info);
 
 
 
@@ -467,7 +483,8 @@ router.get("/sent_request/:workshop_id", async (req, res) => {
       }
   
       user_info =  user_info.flat();
-      console.log(user_info);
+      
+      // console.log(user_info);
 
       const output = user_info.map(user => {
         const full_name = `${user.first_name} ${user.last_name}`;
@@ -529,7 +546,7 @@ router.get("/accepted_request/:workshop_id", async (req, res) => {
       }
   
       user_info =  user_info.flat();
-      console.log(user_info);
+      // console.log(user_info);
 
       const output = user_info.map(user => {
         const full_name = `${user.first_name} ${user.last_name}`;
@@ -560,7 +577,7 @@ router.get("/accepted_request/:workshop_id", async (req, res) => {
 router.post("/updateData", async (req, res) => {
   try {
 
-    console.log("does it come to update data??")
+    // console.log("does it come to update data??")
 
     
     workshop_id = req.body.workshop_id;
@@ -579,7 +596,7 @@ router.post("/updateData", async (req, res) => {
 
     const jsonString = JSON.stringify(jsonEntries);
 
-    console.log(jsonString);
+    // console.log(jsonString);
 
 
 
@@ -613,10 +630,10 @@ router.post("/updateData", async (req, res) => {
 router.get("/auto_suggest/:workshop_id", async (req, res) => {
   try {
 
-    console.log("workshop er autosuggestion")
+    // console.log("workshop er autosuggestion")
     const workshop_id = req.params.workshop_id;
 
-    console.log(workshop_id);
+    // console.log(workshop_id);
 
     
     var already_assigned = [];
@@ -658,8 +675,8 @@ router.get("/auto_suggest/:workshop_id", async (req, res) => {
 
     related_fields = related_fields.flat(); // flattening the array to get rid of annoying [] 's
 
-    console.log("RELATED fields");
-    console.log(related_fields);
+    // console.log("RELATED fields");
+    // console.log(related_fields);
 
 
 
@@ -707,8 +724,8 @@ router.get("/auto_suggest/:workshop_id", async (req, res) => {
     Any value that is in related_fields will be inside the possible_user_id
     */
 
-    console.log("possible user id");
-    console.log(possible_user_id);
+    // console.log("possible user id");
+    // console.log(possible_user_id);
 
 
     // possible_user_id = possible_user_id.filter(user =>  !related_institution.includes(user.current_institution));
@@ -751,7 +768,7 @@ router.get("/auto_suggest/:workshop_id", async (req, res) => {
 
         
 
-        console.log(actual_reviewer_id)
+        // console.log(actual_reviewer_id)
 
         
         for(let i = 0; i<actual_reviewer_id.length;i++)
