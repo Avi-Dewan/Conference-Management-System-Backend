@@ -801,8 +801,56 @@ router.get("/auto_suggest/:workshop_id", async (req, res) => {
 
 
 
+// table: conferenceChair(conference_id, user_id), workshop(workshop_id, workshop_details, conference_id), workshop_taker(workshop_id, user_id), conference(conference_id, conference_title)
+
+// given a user_id from conferenceChair, get all the workshops that are without any unassigned workshop_taker
+router.get('/unassignedInstructor/:user_id', async (req, res) => {
+  try {
+    const user_id = req.params.user_id;
+
+    // Fetch all conferences chaired by the user
+    const { data: conferences, error: conferenceError } = await db
+      .from('conferenceChair')
+      .select('conference_id')
+      .eq('user_id', user_id);
+
+    if (conferenceError) {
+      throw conferenceError;
+    }
+
+    const conferenceIds = conferences.map(conference => conference.conference_id);
+
+    // Fetch all workshops with conference details
+    const { data: allWorkshops, error: workshopError } = await db
+      .from('workshop')
+      .select('*, conference(conference_title)')
+      .in('conference_id', conferenceIds);
+
+    if (workshopError) {
+      throw workshopError;
+    }
+
+    // Fetch all workshops with a taker
+    const { data: takenWorkshops, error: takenWorkshopError } = await db
+      .from('assignedInstructor')
+      .select('workshop_id');
+
+    if (takenWorkshopError) {
+      throw takenWorkshopError;
+    }
+
+    const takenWorkshopIds = takenWorkshops.map(workshop => workshop.workshop_id);
+
+    // Filter out workshops that have a taker
+    const workshops = allWorkshops.filter(workshop => !takenWorkshopIds.includes(workshop.workshop_id));
 
 
+    res.status(200).json(workshops);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 module.exports = router;
 
