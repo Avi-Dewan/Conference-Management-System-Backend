@@ -56,6 +56,7 @@ router.get("/get_conference/:workshop_id", async (req, res) => { //retrieves pap
      
 
      let conference_id = data[0].conference_id
+     let workshop_title = data[0].workshop_title
      
      let conference_details = (await db
         .from('conference')
@@ -68,6 +69,7 @@ router.get("/get_conference/:workshop_id", async (req, res) => { //retrieves pap
         .eq('conference_id', conference_id)).data;
 
         let result = {
+        
         chair_id : chair_id[0].user_id,
         conference_details : {conference_id: conference_details[0].conference_id, conference_title: conference_details[0].conference_title}
 
