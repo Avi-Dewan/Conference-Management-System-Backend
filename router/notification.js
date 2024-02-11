@@ -37,6 +37,28 @@ router.get("/:user_id",async (req,res) =>
 
 });
 
+// a route to get number of unread notifications of user_id
+router.get("/unreadCount/:user_id", async (req, res) => {
+  try {
+    const user_id = req.params.user_id;
+    const { data, error } = await db
+      .from('notification')
+      .select('notification_id', 'notification_status', 'user_id', 'notification_time', 'notification_body', 'notification_json', 'notification_time', 'count:notification_id')
+      .eq('user_id', user_id)
+      .eq('notification_status', 'unread');
+
+    if (error) {
+      throw error;
+    }
+
+    res.status(200).json({ unreadCount: data.length });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 router.get("/single/:notification_id/:user_id",async (req,res) => 
 {
   try {

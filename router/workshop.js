@@ -38,6 +38,49 @@ router.post("/create", async (req, res) => {
 });
 
 
+router.get("/get_conference/:workshop_id", async (req, res) => { //retrieves paper info based on paper id
+  try {
+
+    const workshop_id = req.params.workshop_id;
+
+    let { data, error } = await db
+      .from('workshop')
+      .select('conference_id')
+      .eq('workshop_id', workshop_id);
+
+    if (error) {
+      throw error;
+    }
+
+   
+     
+
+     let conference_id = data[0].conference_id
+     
+     let conference_details = (await db
+        .from('conference')
+        .select('conference_id,conference_title')
+        .eq('conference_id', conference_id)).data;
+      
+      let chair_id = (await db
+        .from('conferenceChair')
+        .select('user_id')
+        .eq('conference_id', conference_id)).data;
+
+        let result = {
+        chair_id : chair_id[0].user_id,
+        conference_details : {conference_id: conference_details[0].conference_id, conference_title: conference_details[0].conference_title}
+
+     }
+      
+      
+      res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
 // Get all workshops for a conference by conference ID
 router.get('/all/:conference_id', async (req, res) => {
   try {
@@ -857,8 +900,56 @@ router.get("/auto_suggest/:workshop_id", async (req, res) => {
 
 
 
+// table: conferenceChair(conference_id, user_id), workshop(workshop_id, workshop_details, conference_id), workshop_taker(workshop_id, user_id), conference(conference_id, conference_title)
+
+// given a user_id from conferenceChair, get all the workshops that are without any unassigned workshop_taker
+router.get('/unassignedInstructor/:user_id', async (req, res) => {
+  try {
+    const user_id = req.params.user_id;
+
+    // Fetch all conferences chaired by the user
+    const { data: conferences, error: conferenceError } = await db
+      .from('conferenceChair')
+      .select('conference_id')
+      .eq('user_id', user_id);
+
+    if (conferenceError) {
+      throw conferenceError;
+    }
+
+    const conferenceIds = conferences.map(conference => conference.conference_id);
+
+    // Fetch all workshops with conference details
+    const { data: allWorkshops, error: workshopError } = await db
+      .from('workshop')
+      .select('*, conference(conference_title)')
+      .in('conference_id', conferenceIds);
+
+    if (workshopError) {
+      throw workshopError;
+    }
+
+    // Fetch all workshops with a taker
+    const { data: takenWorkshops, error: takenWorkshopError } = await db
+      .from('assignedInstructor')
+      .select('workshop_id');
+
+    if (takenWorkshopError) {
+      throw takenWorkshopError;
+    }
+
+    const takenWorkshopIds = takenWorkshops.map(workshop => workshop.workshop_id);
+
+    // Filter out workshops that have a taker
+    const workshops = allWorkshops.filter(workshop => !takenWorkshopIds.includes(workshop.workshop_id));
 
 
+    res.status(200).json(workshops);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 module.exports = router;
 

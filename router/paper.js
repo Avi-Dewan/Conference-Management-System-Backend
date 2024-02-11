@@ -454,7 +454,26 @@ router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retr
   });;
 
 
-
+router.get("/all_authors/:paper_id", async (req, res) => {
+    try {
+      // get all the papers of a user
+      const paper_id = req.params.paper_id;
+  
+      const { data, error } = await db
+        .from('paperAuthor')
+        .select('user_id')
+        .eq('paper_id', paper_id);
+  
+      if (error) {  
+        throw error;
+      } else { 
+        res.status(200).json(data);
+      }
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send('Internal Server Error');
+    }
+  });;
 
 
 
