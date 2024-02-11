@@ -38,6 +38,49 @@ router.post("/create", async (req, res) => {
 });
 
 
+router.get("/get_conference/:workshop_id", async (req, res) => { //retrieves paper info based on paper id
+  try {
+
+    const workshop_id = req.params.workshop_id;
+
+    let { data, error } = await db
+      .from('workshop')
+      .select('conference_id')
+      .eq('workshop_id', workshop_id);
+
+    if (error) {
+      throw error;
+    }
+
+   
+     
+
+     let conference_id = data[0].conference_id
+     
+     let conference_details = (await db
+        .from('conference')
+        .select('conference_id,conference_title')
+        .eq('conference_id', conference_id)).data;
+      
+      let chair_id = (await db
+        .from('conferenceChair')
+        .select('user_id')
+        .eq('conference_id', conference_id)).data;
+
+        let result = {
+        chair_id : chair_id[0].user_id,
+        conference_details : {conference_id: conference_details[0].conference_id, conference_title: conference_details[0].conference_title}
+
+     }
+      
+      
+      res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
 // Get all workshops for a conference by conference ID
 router.get('/all/:conference_id', async (req, res) => {
   try {
