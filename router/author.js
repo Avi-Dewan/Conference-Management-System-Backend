@@ -57,6 +57,62 @@ router.get("/get_request/:user_id", async (req, res) => {
   });
 
 
+
+  router.get("/get_request/:user_id/:paper_id", async (req, res) => {
+    try {
+  
+      const user_id = req.params.user_id;
+      const paper_id = req.params.paper_id;
+  
+      // console.log(user_id);
+  
+  
+  
+      var { data, error } = await db //fetching data from paper table.
+        .from('author_request')
+        .select('*')
+        .eq('user_id', user_id)
+        .eq('paper_id',paper_id); 
+  
+      //   data = data.flat();
+  
+      const paperIds = [...new Set(data.map(item => item.paper_id))];
+  
+  
+  
+      // console.log(paperIds);
+  
+      let paper_info = [];
+      for(let i = 0; i<paperIds.length; i++){
+  
+          let pid = paperIds[i];
+          var {data, error} = await db
+          .from('paper')
+          .select('*')
+          .eq('paper_id' , pid);
+  
+  
+          paper_info.push(data);
+      }
+  
+      paper_info =  paper_info.flat();
+     
+      // console.log(paper_info);
+  
+  
+  
+      //   console.log(data);
+  
+      res.status(200).json(paper_info);
+  
+      
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+
   router.post("/reject_request", async (req, res) => {
     try {
   

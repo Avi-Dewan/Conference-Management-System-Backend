@@ -236,7 +236,7 @@ router.post("/submit", async (req, res) => {
 
 
 
-      res.status(201).json("Paper created successfully");
+      res.status(201).json(paper_id);
     } catch (error2) {
       console.error(error2);
       
