@@ -424,6 +424,62 @@ router.get("/get_request/:user_id", async (req, res) => {
 });
 
 
+router.get("/get_request/:user_id/:workshop_id", async (req, res) => {
+  try {
+
+    const user_id = req.params.user_id;
+
+    const workshop_id = req.params.workshop_id;
+
+    // console.log(user_id);
+
+
+
+    var { data, error } = await db //fetching data from paper table.
+      .from('workshop_request')
+      .select('*')
+      .eq('user_id', user_id)
+      .eq('workshop_id',workshop_id)
+
+    //   data = data.flat();
+
+    const workshopIds = [...new Set(data.map(item => item.workshop_id))];
+
+
+
+    // console.log(workshopIds);
+
+    let workshop_info = [];
+    for(let i = 0; i<workshopIds.length; i++){
+
+        let wid = workshopIds[i];
+        var {data, error} = await db
+        .from('workshop')
+        .select('*')
+        .eq('workshop_id' , wid);
+
+
+        workshop_info.push(data);
+    }
+
+    workshop_info =  workshop_info.flat();
+
+
+    // console.log(workshop_info);
+
+
+
+    //   console.log(data);
+
+    res.status(200).json(workshop_info);
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 router.post("/reject_request", async (req, res) => {
   try {
 
