@@ -54,7 +54,7 @@ router.get("/getConferenceInfo/:paper_id",async (req,res) =>   //retrives confer
 });
 
 
-router.get("/:paper_id",async (req,res) => 
+router.get("/:paper_id",async (req,res) =>    //get all paper info based on paper id
 {
   try {
       const paper_id = req.params.paper_id;
@@ -109,6 +109,32 @@ router.get("/:paper_id/author",async (req,res) =>
       res.status(500).json({ error: 'Internal Server Error' });
     }
 
+});
+
+router.put('/edit_paper/:paper_id', async (req, res) => {
+  try {
+    const paper_id = req.params.paper_id;
+    const { name } = req.body;
+
+    console.log(req.body)
+    //Your Supabase update operation here
+    const { data, error } = await db.from('paper').upsert([
+      {
+        paper_id: paper_id,
+        paper_title: req.body.paper_title,
+        abstract: req.body.abstract,
+        related_fields: req.body.related_fields,
+        pdf_link: req.body.pdf_link
+      },
+    ], { onConflict: 'paper_id' })
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 router.get("/all", async (req, res) => {

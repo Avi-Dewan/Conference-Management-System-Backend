@@ -49,4 +49,26 @@ router.post("/reject_paper", async (req, res) => {
   });
 
 
+  router.post("/revise_paper", async (req, res) => {
+    try {
+  
+  
+        let {paper_id} = req.body;
+      
+
+      const { data, error } = await db
+        .from('paper')
+        .update({status: 'revise'})
+        .eq("paper_id" , paper_id);
+  
+  
+      res.status(201).json("deleted successfully");
+    } catch (error2) {
+      console.error(error2);
+      
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+    
+  });
+
 module.exports = router;
