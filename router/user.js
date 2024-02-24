@@ -76,4 +76,59 @@ router.delete("/:user_id", async (req, res) => {
   }
 });
 
+
+// update user details
+// only change the details that are passed in the request body, don't change the rest
+
+router.put("/:user_id", async (req, res) => {
+  try {
+    const userId = req.params.user_id;
+    const { first_name, last_name, date_of_birth, email, current_institution, personal_links, expertise } = req.body;
+    
+    // Create an object with the fields to update
+    const fieldsToUpdate = {
+      user_id: userId,
+    };
+
+    if (first_name) {
+      fieldsToUpdate.first_name = first_name;
+    }
+
+    if (last_name) {
+      fieldsToUpdate.last_name = last_name;
+    }
+    
+    if (date_of_birth) {
+      fieldsToUpdate.date_of_birth = date_of_birth;
+    }
+    
+    if (email) {
+      fieldsToUpdate.email = email;
+    }
+    
+    if (current_institution) {
+      fieldsToUpdate.current_institution = current_institution;
+    }
+    
+    if (personal_links) {
+      fieldsToUpdate.personal_links = personal_links;
+    }
+    
+    if (expertise) {
+      fieldsToUpdate.expertise = expertise;
+    }
+
+    const { data, error } = await db.from('user').update(fieldsToUpdate).eq('user_id', userId);
+    
+    if (error) {
+      throw error;
+    }
+
+    res.status(201).send('User details updated successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 module.exports = router;
