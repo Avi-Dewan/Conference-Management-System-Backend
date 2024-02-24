@@ -99,6 +99,7 @@ router.post("/delete_request", async (req, res) => {
     } catch (error2) {
       console.error(error2);
       
+      
       res.status(500).json({ error: 'Internal Server Error' });
     }
     
