@@ -146,6 +146,53 @@ router.post('/logout', (req, res) => {
 });
 
 
+// changePassword route
+
+router.post('/changePassword', async (req, res) => {
+  try {
+    const { email, oldPassword, confirmPassword, newPassword } = req.body;
+
+    if (confirmPassword !== newPassword) {
+      return res.status(400).json({ error: 'Passwords do not match' });
+    }
+
+    // Use authentication system to sign in
+    const { data: authData, error: authError } = await db.from('auth').select().eq('email', email).single();
+
+    if (!authData) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(oldPassword, authData.hashed_password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Wrong Password!' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the password
+    const { data, error } = await db.from('auth').upsert([
+      {
+        email,
+        user_id: authData.user_id,
+        hashed_password: hashedPassword,
+      },
+    ]);
+
+    if (error) {
+      throw error;
+    }
+
+    res.status(200).json({ message: 'Password updated successfully' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 
 module.exports = router;
 

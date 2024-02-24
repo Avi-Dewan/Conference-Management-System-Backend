@@ -1,9 +1,13 @@
 // trial.js
 const express = require('express');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+dotenv.config();
+
 const db = require('../db/database'); 
 
 const { v4: uuidv4 } = require('uuid');
-const e = require('express');
 
 
 
@@ -54,7 +58,7 @@ router.get("/getConferenceInfo/:paper_id",async (req,res) =>   //retrives confer
 });
 
 
-router.get("/:paper_id",async (req,res) => 
+router.get("/:paper_id",async (req,res) =>    //get all paper info based on paper id
 {
   try {
       const paper_id = req.params.paper_id;
@@ -111,6 +115,32 @@ router.get("/:paper_id/author",async (req,res) =>
 
 });
 
+router.put('/edit_paper/:paper_id', async (req, res) => {
+  try {
+    const paper_id = req.params.paper_id;
+    const { name } = req.body;
+
+    console.log(req.body)
+    //Your Supabase update operation here
+    const { data, error } = await db.from('paper').upsert([
+      {
+        paper_id: paper_id,
+        paper_title: req.body.paper_title,
+        abstract: req.body.abstract,
+        related_fields: req.body.related_fields,
+        pdf_link: req.body.pdf_link
+      },
+    ], { onConflict: 'paper_id' })
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 router.get("/all", async (req, res) => {
     try {
       const { data, error } = await db
@@ -143,40 +173,129 @@ router.post("/delete_submission", async (req, res) => {
 
 });
 
+
+
 router.post("/submit", async (req, res) => {
     try {
       
-      const rifat = "c89a31f7-da91-42a8-8c6e-9cf5a47742a8";
-      const avi =   "0aa34e07-985a-42ec-8299-48db5ab0581d";
-      const rakib = "53012147-ccd7-4179-8166-76270223a9f2";
-      const nafi =  "b51d5f7c-f023-4e07-aa94-45af7b9340c7";
-      const piol =  "66df2a4d-0ad9-462d-9953-d2453c2b2175";
-
-      var paper1,paper2 , paper3;
-
-      paper1 = "7b3b5479-e7c9-4298-8432-07a95f34ef9b";
-      paper2 = "2b8d62f2-fa14-4ce1-9d78-3f132fbe7d98";
-      paper3 = "31ad3d24-a21e-4191-9cd9-c3e1bfef251e";
 
 
-    //   const paper_id = paper2;
+      //   const paper_id = paper2;
 
-      let user_id = avi; // this is just to  test the db, actual author_id will come from req.body
-      let {paper_id, paper_title, abstract, pdf_link, related_fields , file ,co_authors,main_author_id,conference_id} = req.body;
+      let user_id = req.body.main_author_id; // this is just to  test the db, actual author_id will come from req.body
+      let {paper_title, abstract, pdf_link, related_fields ,co_authors , co_authors_without_account, main_author_id, conference_id} = req.body;
+        
+        // main_author_id -> bring main author info from user table in main_author_info
+
+      const {data:main_author_info } = await db.from('user').select('*').eq('user_id', main_author_id).single();
+        
+  
+      let paper_id = uuidv4();
+
+      let co_authors_wihtout_account_id = [];
       
-      paper_id = uuidv4();
 
-      // console.log(req.body)
+      for (let coAuthor of co_authors_without_account) {
+        const user_id = uuidv4();
+        const password = Math.random().toString(36).slice(-8);
+        const hashedPassword = await bcrypt.hash(password, 10);
+  
+        const { error: userError } = await db
+          .from('user')
+          .insert([
+            {
+              user_id,
+              first_name: coAuthor.first_name,
+              last_name: coAuthor.last_name,
+              email: coAuthor.email,
+              current_institution: coAuthor.affiliation,
+              expertise: [],
+              personal_links: [],
+            },
+          ]);
+  
+        if (userError) {
+          throw userError;
+        }
+        
+        // console.log(`User created with email: ${coAuthor.email}`);
+  
+        const { error: authError } = await db
+          .from('auth')
+          .insert([
+            {
+              user_id,
+              email: coAuthor.email,
+              hashed_password: hashedPassword
+            }
+          ]);
+        
+        // console.log(authError);
+        
+        if (authError) {
+          throw authError;
+        }
+        
+        // console.log(`auth created with password: ${password}`);
+  
+        const transporter = nodemailer.createTransport({
+          service: "Gmail",
+          auth: {
+            user: `${process.env.DB_GMAIL}`,
+            pass: `${process.env.DB_GMAIL_PASSWORD}`,
+          },
+        });
+    
+    
+        const mailOptions = {
+          from: process.env.DB_GMAIL,
+          to: coAuthor.email,
+          subject: "Account created for Conference Management System",
+          html: `
+          <h1>Welcome to Conference Management System</h1>
+          <p> User ${main_author_info.first_name} ${main_author_info.last_name} has made you o-author for paper: ${paper_title} </p>
+          <br>
+          <p> An account has been created for you on Conference Management System </p>
+
+          <p> Your email is: ${coAuthor.email} </p>
+          <p> Your password is: ${password} </p>
+
+          <p> You can change your password and edit user info by loggin in:  
+         <a href="http://localhost:5173/login/normal style="background-color: 
+          blue; color: white; padding: 10px 20px; text-decoration: none;">Click Me</a>
+
+          </p>
+      `,
+        };
+    
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            // console.log(error);
+            return res.status(500).json({ error: "Email could not be sent" });
+          } else {
+            // console.log("Email sent: " + info.response);
+            return res.status(200).json({ message: "Email send successfully" });
+          }
+        });
+  
+        co_authors.push({ user_id });
+        co_authors_wihtout_account_id.push(user_id);
+      }
+
+      // console.log(co_authors);
+
+      
       
       
       let author_id_arr = []
+
       for(let i=0;i<co_authors.length;i++)
       {
         author_id_arr = [...author_id_arr,co_authors[i].user_id]
       }
       // author_id_arr = [main_author_id, ... author_id_arr]
 
-
+      // console.log(author_id_arr);
   
       const { data, error } = await db
         .from('paper')
@@ -193,10 +312,10 @@ router.post("/submit", async (req, res) => {
           },
         ]);
 
+      // console.log("paper inserted");
         
-        
-        for(let i=0;i<author_id_arr.length;i++)
-        {
+      for(let i=0;i<author_id_arr.length;i++)
+      {
           user_id = author_id_arr[i];
           const {data2 , error2} = await db
           .from('author_request')
@@ -211,9 +330,11 @@ router.post("/submit", async (req, res) => {
         
     
         if ( error2) {
-          throw error;
+          throw error2;
         }
       }
+
+      // console.log("author request inserted");
 
 
       user_id = main_author_id;
@@ -227,18 +348,21 @@ router.post("/submit", async (req, res) => {
           }
       ]
       );
+
+      
     
 
       if ( error3) {
-        throw error;
+        throw error3;
       }
 
 
+      // console.log("paper author inserted");
 
+      res.status(201).json({paper_id: paper_id, co_authors_wihtout_account_id: co_authors_wihtout_account_id});
+    } catch (err) {
 
-      res.status(201).json(paper_id);
-    } catch (error2) {
-      console.error(error2);
+      console.error("error: ", err);
       
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -391,8 +515,50 @@ router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retr
 
         paper_details["reviews"] = reviews
 
+        
+        const { data: revisedData } = await db.from('revisePaperSubmission').select('*').eq('paper_id', paper_details.paper_id);
+        
+        if(revisedData.length > 0)
+        {
+           const currentDate = new Date();
+
+            paper_details.submission_deadline = revisedData[0].deadline;
+
+             const submissionDeadline = new Date(
+            `${paper_details.submission_deadline.date}T${paper_details.submission_deadline.time}`);
+
+            if (submissionDeadline < currentDate)
+            {
+              paper_details.submission_status = "closed";
+              
+              // await db
+              // .from('paper')
+              // .update({status: 'revise'})
+              // .eq("paper_id" , paper_details.paper_id);
+
+            }
+            else paper_details.submission_status = "open";
+        }
         // console.log("paper details printing")
         // console.log(paper_details)
+
+        const { data: conferenceDeadline } = await db.from('paper').select('conference(conference_id,submission_deadline)').eq('paper_id', paper_details.paper_id);
+        
+        let conference_deadline = conferenceDeadline[0].conference.submission_deadline;
+        const currentDate = new Date();
+        paper_details.conference_deadline = conference_deadline;
+
+         const confsubmissionDeadline = new Date(
+            `${paper_details.conference_deadline.date}T${paper_details.conference_deadline.time}`);
+
+            if (confsubmissionDeadline < currentDate)
+            {
+              paper_details.conference_submission_status = "closed";
+            }
+            else
+            {
+              paper_details.conference_submission_status = "open";
+            }
 
       myPapers.push(paper_details)
 
