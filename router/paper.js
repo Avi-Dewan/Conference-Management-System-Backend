@@ -417,8 +417,50 @@ router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retr
 
         paper_details["reviews"] = reviews
 
+        
+        const { data: revisedData } = await db.from('revisePaperSubmission').select('*').eq('paper_id', paper_details.paper_id);
+        
+        if(revisedData.length > 0)
+        {
+           const currentDate = new Date();
+
+            paper_details.submission_deadline = revisedData[0].deadline;
+
+             const submissionDeadline = new Date(
+            `${paper_details.submission_deadline.date}T${paper_details.submission_deadline.time}`);
+
+            if (submissionDeadline < currentDate)
+            {
+              paper_details.submission_status = "closed";
+              
+              // await db
+              // .from('paper')
+              // .update({status: 'revise'})
+              // .eq("paper_id" , paper_details.paper_id);
+
+            }
+            else paper_details.submission_status = "open";
+        }
         // console.log("paper details printing")
         // console.log(paper_details)
+
+        const { data: conferenceDeadline } = await db.from('paper').select('conference(conference_id,submission_deadline)').eq('paper_id', paper_details.paper_id);
+        
+        let conference_deadline = conferenceDeadline[0].conference.submission_deadline;
+        const currentDate = new Date();
+        paper_details.conference_deadline = conference_deadline;
+
+         const confsubmissionDeadline = new Date(
+            `${paper_details.conference_deadline.date}T${paper_details.conference_deadline.time}`);
+
+            if (confsubmissionDeadline < currentDate)
+            {
+              paper_details.conference_submission_status = "closed";
+            }
+            else
+            {
+              paper_details.conference_submission_status = "open";
+            }
 
       myPapers.push(paper_details)
 
