@@ -36,7 +36,7 @@ router.post("/reject_paper", async (req, res) => {
       const { data, error } = await db
         .from('poster')
         .update({status: 'rejected'})
-        .eq("poster_id" , paper_id);
+        .eq("poster_id" , poster_id);
   
   
       res.status(201).json("deleted successfully");

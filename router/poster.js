@@ -559,7 +559,7 @@ router.get("/assign/auto/:poster_id", async (req, res) => {
   
       let notification_JSON = {
   
-        type: 'reviewer_request',
+        type: 'poster_reviewer_request',
         requested_user_id : user_id,
         requested_poster_id : poster_id,
         requested_poster_title : poster_title
@@ -634,7 +634,7 @@ router.get("/assign/auto/:poster_id", async (req, res) => {
   
       let notification_JSON = {
   
-        type: 'reviewer_request',
+        type: 'poster_reviewer_request',
         requested_user_id : user_id,
         requested_poster_id : poster_id,
         requested_poster_title : poster_title
@@ -1456,7 +1456,7 @@ router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retr
               poster_details.conference_submission_status = "open";
             }
 
-      myPapers.push(poster_details)
+      myPosters.push(poster_details)
 
         
     }
@@ -1472,7 +1472,7 @@ router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retr
     //   .select('user_id')
     //   .eq('conference_id', conference_id)).data;
 
-    res.status(200).json(myPapers);
+    res.status(200).json(myPosters);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
