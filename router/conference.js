@@ -550,11 +550,18 @@ router.get("/unassignedPapers/:user_id", async (req, res) => {
         let filteredPapers = []
         for(let i=0;i<papers.length;i++)
         {
+
+          let conference_title = (await db 
+            .from('conference').select('conference_title').eq('conference_id',conference_id)).data
+          papers[i].conference_title = conference_title[0].conference_title;
+         
           let reviewer = (await db
           .from('assignedReviewer')
           .select('user_id')
           .match({"paper_id":papers[i].paper_id})).data;
          // .eq('paper_id', papers[i].paper_id)).data;
+
+         
 
           if(reviewer == null || reviewer.length == 0)
           {
@@ -596,60 +603,60 @@ router.get("/unassignedPapers/:user_id", async (req, res) => {
             // console.log(authorNames);
 
           // Fetch requested reviewers for the paper
-          const { data: requestedReviewers, error: reviewersError } = await db
-              .from('request')
-              .select('user_id')
-              .eq('paper_id', paper.paper_id);
+        //   const { data: requestedReviewers, error: reviewersError } = await db
+        //       .from('request')
+        //       .select('user_id')
+        //       .eq('paper_id', paper.paper_id);
 
-              if (reviewersError) {
-                throw reviewersError;
-              }
+        //       if (reviewersError) {
+        //         throw reviewersError;
+        //       }
       
-            // Fetch full names of requested reviewers
-            const reviewerNames = await Promise.all(
-              requestedReviewers.map(async (reviewer) => {
-                const { data: user, error: userError } = await db
-                  .from('user')
-                  .select('*')
-                  .eq('user_id', reviewer.user_id)
-                  .single();
+        //     // Fetch full names of requested reviewers
+        //     const reviewerNames = await Promise.all(
+        //       requestedReviewers.map(async (reviewer) => {
+        //         const { data: user, error: userError } = await db
+        //           .from('user')
+        //           .select('*')
+        //           .eq('user_id', reviewer.user_id)
+        //           .single();
       
-                if (userError) {
-                  throw userError;
-                }
+        //         if (userError) {
+        //           throw userError;
+        //         }
       
-                return `${user.first_name} ${user.last_name}`;
-              })
-            );
+        //         return `${user.first_name} ${user.last_name}`;
+        //       })
+        //     );
 
-          // console.log(reviewerNames);
+        //   // console.log(reviewerNames);
 
-        // Fetch reviews for the paper
-        const { data: reviews, error: reviewsError } = await db
-          .from('assignedReviewer')
-          .select('user_id, rating, review, user(first_name, last_name)')
-          .eq('paper_id', paper.paper_id);
+        // // Fetch reviews for the paper
+        // const { data: reviews, error: reviewsError } = await db
+        //   .from('assignedReviewer')
+        //   .select('user_id, rating, review, user(first_name, last_name)')
+        //   .eq('paper_id', paper.paper_id);
 
-        if (reviewsError) {
-          throw reviewsError;
-        }
+        // if (reviewsError) {
+        //   throw reviewsError;
+        // }
 
 
-        // Add full_name field to each reviewer
-        const reviewsWithFullName = reviews.map((reviewer) => ({
-          user_id: `${reviewer.user_id}`,
-          rating: reviewer.rating,
-          review: `${reviewer.review}`,
-          full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
-        }));
+        // // Add full_name field to each reviewer
+        // const reviewsWithFullName = reviews.map((reviewer) => ({
+        //   user_id: `${reviewer.user_id}`,
+        //   rating: reviewer.rating,
+        //   review: `${reviewer.review}`,
+        //   full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+        // }));
 
 
         // Add additional information to the paper
         return {
           ...paper,
           authors: authorNames,
-          requestedReviewers: reviewerNames,
-          reviews: reviewsWithFullName,
+          //requestedReviewers: reviewerNames,
+          //reviews: reviewsWithFullName,
         };
 
             // i also want 2 more info for each paper
@@ -1104,7 +1111,7 @@ router.get("/pendingPapers/:user_id", async (req, res) => {
         const { data: papers, error: papersError } = await db
           .from('paper')
           .select('*')
-          .eq('conference_id', conference_id);
+          .match({"conference_id":conference_id , "status":'pending'});
     
         if (papersError) {
           throw papersError;
@@ -1114,6 +1121,11 @@ router.get("/pendingPapers/:user_id", async (req, res) => {
         let filteredPapers = []
         for(let i=0;i<papers.length;i++)
         {
+
+          let conference_title = (await db 
+            .from('conference').select('conference_title').eq('conference_id',conference_id)).data
+          papers[i].conference_title = conference_title[0].conference_title;
+          
           let reviewer = (await db
           .from('assignedReviewer')
           .select('user_id,rating,review')
@@ -1130,6 +1142,7 @@ router.get("/pendingPapers/:user_id", async (req, res) => {
           
           
         }
+        
     
       
     
@@ -1165,60 +1178,60 @@ router.get("/pendingPapers/:user_id", async (req, res) => {
             // console.log(authorNames);
     
           // Fetch requested reviewers for the paper
-          const { data: requestedReviewers, error: reviewersError } = await db
-              .from('request')
-              .select('user_id')
-              .eq('paper_id', paper.paper_id);
+          // const { data: requestedReviewers, error: reviewersError } = await db
+          //     .from('request')
+          //     .select('user_id')
+          //     .eq('paper_id', paper.paper_id);
     
-            if (reviewersError) {
-              throw reviewersError;
-            }
+          //   if (reviewersError) {
+          //     throw reviewersError;
+          //   }
     
-          // Fetch full names of requested reviewers
-          const reviewerNames = await Promise.all(
-            requestedReviewers.map(async (reviewer) => {
-              const { data: user, error: userError } = await db
-                .from('user')
-                .select('*')
-                .eq('user_id', reviewer.user_id)
-                .single();
+          // // Fetch full names of requested reviewers
+          // const reviewerNames = await Promise.all(
+          //   requestedReviewers.map(async (reviewer) => {
+          //     const { data: user, error: userError } = await db
+          //       .from('user')
+          //       .select('*')
+          //       .eq('user_id', reviewer.user_id)
+          //       .single();
     
-              if (userError) {
-                throw userError;
-              }
+          //     if (userError) {
+          //       throw userError;
+          //     }
     
-              return `${user.first_name} ${user.last_name}`;
-            })
-          );
+          //     return `${user.first_name} ${user.last_name}`;
+          //   })
+          // );
     
           // console.log(reviewerNames);
     
         // Fetch reviews for the paper
-        const { data: reviews, error: reviewsError } = await db
-          .from('assignedReviewer')
-          .select('user_id, rating, review, user(first_name, last_name)')
-          .eq('paper_id', paper.paper_id);
+        // const { data: reviews, error: reviewsError } = await db
+        //   .from('assignedReviewer')
+        //   .select('user_id, rating, review, user(first_name, last_name)')
+        //   .eq('paper_id', paper.paper_id);
     
-        if (reviewsError) {
-          throw reviewsError;
-        }
+        // if (reviewsError) {
+        //   throw reviewsError;
+        // }
     
     
-        // Add full_name field to each reviewer
-        const reviewsWithFullName = reviews.map((reviewer) => ({
-          user_id: `${reviewer.user_id}`,
-          rating: reviewer.rating,
-          review: `${reviewer.review}`,
-          full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
-        }));
+        // // Add full_name field to each reviewer
+        // const reviewsWithFullName = reviews.map((reviewer) => ({
+        //   user_id: `${reviewer.user_id}`,
+        //   rating: reviewer.rating,
+        //   review: `${reviewer.review}`,
+        //   full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+        // }));
     
     
         // Add additional information to the paper
         return {
           ...paper,
           authors: authorNames,
-          requestedReviewers: reviewerNames,
-          reviews: reviewsWithFullName,
+         // requestedReviewers: reviewerNames,
+          //reviews: reviewsWithFullName,
         };
     
             // i also want 2 more info for each paper

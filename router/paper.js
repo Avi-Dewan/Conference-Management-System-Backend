@@ -610,7 +610,34 @@ router.get("/mysubmission/:conference_id/:user_id", async (req, res) => { //retr
   
           return paper[0]; 
         }));
-  
+
+        for(let i=0;i<papers.length;i++)
+        {
+          let conference_id = papers[i].conference_id;
+          let conference_title = (await db
+            .from('conference')
+            .select('conference_title')
+            .eq('conference_id', conference_id)).data[0].conference_title;
+          papers[i].conference_title = conference_title;
+
+          let paper_id = papers[i].paper_id;
+          let authors = (await db
+            .from('paperAuthor')
+            .select('user_id')
+            .eq('paper_id', paper_id)).data;
+          let author_names = [];
+          for(let j=0;j<authors.length;j++)
+          {
+            let user_id = authors[j].user_id;
+            let author_name = (await db
+              .from('user')
+              .select('first_name,last_name')
+              .eq('user_id', user_id)).data[0];
+
+            author_names.push(author_name.first_name + ' ' + author_name.last_name);
+          }
+          papers[i].authors = author_names;
+        }
         res.status(200).json(papers);
       }
     } catch (error) {
