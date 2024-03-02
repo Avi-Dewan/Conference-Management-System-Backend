@@ -99,6 +99,7 @@ router.post("/delete_request", async (req, res) => {
     } catch (error2) {
       console.error(error2);
       
+      
       res.status(500).json({ error: 'Internal Server Error' });
     }
     
@@ -146,6 +147,47 @@ router.get("/paper/:paper_id", async (req, res) => {
   }
 });
 
+
+router.get("/poster/:poster_id", async (req, res) => {
+  try {
+
+    const user_id = req.params.user_id;
+    const poster_id = req.params.poster_id;
+
+    let PosterIds = [];
+
+
+    PosterIds.push(poster_id);
+
+    let poster_info = [];
+    for(let i = 0; i<PosterIds.length; i++){
+
+        let pid = PosterIds[i];
+        var {data, error} = await db
+        .from('poster')
+        .select('*')
+        .eq('poster_id' , pid);
+
+
+        poster_info.push(data);
+    }
+
+    poster_info =  poster_info.flat();
+    
+    // console.log(paper_info);
+
+
+
+    //   console.log(data);
+
+    res.status(200).json(poster_info);
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 
