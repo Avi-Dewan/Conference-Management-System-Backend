@@ -535,10 +535,10 @@ router.post("/request_delete", async (req, res) => {
       .delete()
       .match({"user_id":user_id , "paper_id":paper_id});
 
-      await db
-      .from('notification')
-      .delete()
-      .match({"user_id":user_id});
+      // await db
+      // .from('notification')
+      // .delete()
+      // .match({"user_id":user_id});
 
 
       res.status(201).json("deleted successfully");
