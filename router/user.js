@@ -110,11 +110,11 @@ router.put("/:user_id", async (req, res) => {
       fieldsToUpdate.current_institution = current_institution;
     }
     
-    if (personal_links) {
+    if (personal_links.size !== 0 && personal_links[0]) {
       fieldsToUpdate.personal_links = personal_links;
     }
     
-    if (expertise) {
+    if (expertise.size !== 0 && expertise[0]) {
       fieldsToUpdate.expertise = expertise;
     }
 
@@ -124,10 +124,10 @@ router.put("/:user_id", async (req, res) => {
       throw error;
     }
 
-    res.status(201).send('User details updated successfully');
+    res.status(201).json('User details updated successfully');
   } catch (error) {
     console.error(error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).json('Internal Server Error');
   }
 });
 
