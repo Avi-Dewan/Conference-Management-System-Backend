@@ -121,6 +121,8 @@ router.get('/', async (req, res) => {
   try {
     const token = req.cookies.token;
 
+    console.log(token);
+
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -129,6 +131,8 @@ router.get('/', async (req, res) => {
       if (err) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
+
+      console.log(user);
 
       res.status(200).json({ user_id: user.user_id });
     });
