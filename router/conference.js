@@ -254,6 +254,36 @@ router.get("/:creator_id/all", async (req, res) => {
 
 // get conference paper details ( without authors)
 
+router.get("/:conference_id/get_key_note", async (req, res) => {
+     const conference_id = req.params.conference_id;
+   try {
+     const { data, error } = await db
+      .from('assignedKeynote')
+      .select('user_id')
+      .eq('conference_id', conference_id);
+    
+    if (error) {
+      throw error;
+    }
+
+    console.log(data)
+    for(let i=0;i<data.length;i++)
+    {
+      let user = (await db
+        .from('user')
+        .select('first_name,last_name')
+        .eq('user_id',data[i].user_id)).data
+      data[i].full_name = user[0].first_name + ' ' + user[0].last_name
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+
+});
+
 router.get("/:conference_id/papers", async (req, res) => {
   try {
     const conference_id = req.params.conference_id;
