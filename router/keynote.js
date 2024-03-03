@@ -5,6 +5,10 @@ const db = require('../db/database');
 const { v4: uuidv4 } = require('uuid');
 const e = require('express');
 const { resolveContent } = require('nodemailer/lib/shared');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+dotenv.config();
 
 
 const router = express.Router();
@@ -261,6 +265,160 @@ router.get("/assign/auto/:conference_id", async (req, res) => {
     }
   });
 
+
+  router.post("/assign/requestNew", async (req, res) => {
+    try {
+  
+      let coAuthor = req.body.coAuthor
+      let conference_id = req.body.conference_id
+      let conference_title = req.body.conference_title
+      
+      const user_id = uuidv4();
+      const password = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(password, 10);
+  
+        const { error: userError } = await db
+          .from('user')
+          .insert([
+            {
+              user_id,
+              first_name: coAuthor.first_name,
+              last_name: coAuthor.last_name,
+              email: coAuthor.email,
+              current_institution: coAuthor.affiliation,
+              expertise: [],
+              personal_links: [],
+            },
+          ]);
+  
+        if (userError) {
+          throw userError;
+        }
+        
+        // console.log(`User created with email: ${coAuthor.email}`);
+  
+        const { error: authError } = await db
+          .from('auth')
+          .insert([
+            {
+              user_id,
+              email: coAuthor.email,
+              hashed_password: hashedPassword
+            }
+          ]);
+        
+        // console.log(authError);
+        
+        if (authError) {
+          throw authError;
+        }
+        
+        // console.log(`auth created with password: ${password}`);
+  
+        const transporter = nodemailer.createTransport({
+          service: "Gmail",
+          auth: {
+            user: `${process.env.DB_GMAIL}`,
+            pass: `${process.env.DB_GMAIL_PASSWORD}`,
+          },
+        });
+    
+    
+        const mailOptions = {
+          from: process.env.DB_GMAIL,
+          to: coAuthor.email,
+          subject: "Account created for Conference Management System",
+          html: `
+          <h1>Welcome to Conference Management System</h1>
+          <br>
+          <p> An account has been created for you on Conference Management System </p>
+
+          <p> Your email is: ${coAuthor.email} </p>
+          <p> Your password is: ${password} </p>
+
+          <p> You can change your password and edit user info by loggin in:  
+         <a href="http://localhost:5173/login/normal style="background-color: 
+          blue; color: white; padding: 10px 20px; text-decoration: none;">Click Me</a>
+
+          </p>
+      `,
+        };
+    
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            // console.log(error);
+            return res.status(500).json({ error: "Email could not be sent" });
+          } else {
+            // console.log("Email sent: " + info.response);
+            return res.status(200).json({ message: "Email send successfully" });
+          }
+        });
+  
+      let request_id = uuidv4();
+  
+      const { data, error } = await db
+        .from('requestKeynote')
+        .insert([
+          {
+            user_id : user_id,
+            conference_id : conference_id,
+            request_id : request_id
+          },
+        ]);
+  
+      if (error) {
+        throw error;
+      }
+  
+      // console.log("does it come here");
+  
+  
+      res.status(201).json("Request sent");
+  
+  
+      let notification_JSON = {
+  
+        type: "keynote_request",
+        requested_user_id : user_id,
+        requested_conference_id : conference_id,
+        requested_conference_title : conference_title
+      }
+  
+      let notification_id = uuidv4()
+  
+      let notification_body = `You are requested to be a keynote speaker in the conference titled ${conference_title}`;
+  
+      
+        await db
+        .from('notification')
+        .insert([
+          {
+            notification_id : notification_id,
+            notification_body : notification_body,
+            notification_json : notification_JSON,
+            user_id : user_id
+          },
+        ]);
+  
+        await db
+        .from('requestNotification')
+        .insert([
+          {
+            request_id : request_id,
+            notification_id : notification_id,
+          },
+        ]);
+  
+        
+  
+      
+  
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 
   router.post("/assign/request_delete", async (req, res) => {
