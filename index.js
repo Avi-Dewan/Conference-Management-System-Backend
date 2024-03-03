@@ -31,6 +31,7 @@ const mailRouter = require("./router/mail");
 const authorRouter = require("./router/author");
 const chairRouter = require("./router/chair");
 const posterRouter = require("./router/poster");
+const keynoteRouter = require("./router/keynote");
 
 app.use("/trial", trailRouter);
 app.use("/conference", conferenceRouter);
@@ -46,7 +47,7 @@ app.use("/mail", mailRouter);
 app.use("/author",authorRouter);
 app.use("/chair",chairRouter);
 app.use("/poster",posterRouter);
-
+app.use("/keynote",keynoteRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

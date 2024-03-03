@@ -190,5 +190,48 @@ router.get("/poster/:poster_id", async (req, res) => {
 });
 
 
+router.get("/keynote/:conference_id", async (req, res) => {
+  try {
+
+    const user_id = req.params.user_id;
+    const conference_id = req.params.conference_id;
+
+    let ConfIds = [];
+
+
+    ConfIds.push(conference_id);
+
+    let conf_info = [];
+    for(let i = 0; i<ConfIds.length; i++){
+
+        let cid = ConfIds[i];
+        var {data, error} = await db
+        .from('conference')
+        .select('*')
+        .eq('conference_id' , cid);
+
+
+        conf_info.push(data);
+    }
+
+    conf_info =  conf_info.flat();
+    
+    // console.log(paper_info);
+
+
+
+    //   console.log(data);
+
+    res.status(200).json(conf_info);
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
 
 module.exports = router;

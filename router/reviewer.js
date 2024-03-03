@@ -96,7 +96,7 @@ router.get("/assignedPosters/:user_id", async (req, res) => {
       
       const user_id = req.params.user_id;
 
-      const { data } = await db.from('assignedPosterReviewer').select('poster_id, rating, review, poster( poster_title, abstract, pdf_link, related_fields,status)').eq('user_id', user_id);
+      const { data } = await db.from('assignedPosterReviewer').select('poster_id, rating, review, poster( poster_title, abstract, pdf_link, related_fields,status) ').eq('user_id', user_id);
       
 
       // change the data array so that every item is directly of the json.. not data[0].papr.paper_title . rather data[0].paper_title
@@ -110,6 +110,84 @@ router.get("/assignedPosters/:user_id", async (req, res) => {
             poster_status: item.poster.status,
             ...item.poster
        }));
+
+       //const {author_data} = await db.from()
+
+       console.log(restructuredData);
+
+    //    for(let i=0; i<restructuredData.length; i++)
+    //    {
+    //     const { data: revisedData } = await db.from('revisePaperSubmission').select('*').eq('paper_id', restructuredData[i].paper_id);
+
+    //     if(revisedData.length > 0)
+    //     {
+    //         const currentDate = new Date();
+
+    //         restructuredData[i].submission_deadline = revisedData[0].deadline;
+
+    //          const submissionDeadline = new Date(
+    //         `${restructuredData[i].submission_deadline.date}T${restructuredData[i].submission_deadline.time}`);
+
+    //         if (submissionDeadline < currentDate) restructuredData[i].submission_status = "closed";
+    //         else restructuredData[i].submission_status = "open";
+    //     }
+    //    }
+
+       res.json(restructuredData);
+
+
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
+router.get("/assignedPosters/:user_id/withAuthors", async (req, res) => {
+    try {
+      
+      const user_id = req.params.user_id;
+
+      let { data } = await db.from('assignedPosterReviewer').select('poster_id, rating, review, poster( poster_title, abstract, pdf_link, related_fields,status) ').eq('user_id', user_id);
+      
+
+      // change the data array so that every item is directly of the json.. not data[0].papr.paper_title . rather data[0].paper_title
+
+      // Restructure the data array
+      const restructuredData = data.map(item => ({
+            poster_id: item.poster_id,
+            rating: item.rating,
+            review: item.review,
+            review_status: item.rating !== null && item.review !== null ? "reviewed" : "not reviewed",
+            poster_status: item.poster.status,
+            ...item.poster
+       }));
+
+       //const {author_data} = await db.from()
+
+       console.log("restrct data");
+       console.log(restructuredData);
+
+
+
+    //     let { data2 } = await db
+    //    .from('posterAuthor')
+    //    .select(`user(user_id,first_name,last_name,current_institution)`)
+       
+    //    .eq('poster_id', poster_id);
+ 
+         
+
+    //  let returnData = []
+
+     
+    //  for(let i=0;i<data2.length;i++)
+    //  {
+    //      returnData = [...returnData,{user_id: data2[i].user_id, full_name: data2[i].user.first_name + ' ' + data2[i].user.last_name,current_institution : data2[i].user.current_institution}]
+    //  }
+    //  console.log("return  data");
+    //  console.log(returnData);
 
     //    for(let i=0; i<restructuredData.length; i++)
     //    {
