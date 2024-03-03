@@ -4,6 +4,7 @@ const db = require('../db/database');
 
 const { v4: uuidv4 } = require('uuid');
 const e = require('express');
+const { resolveContent } = require('nodemailer/lib/shared');
 
 
 
@@ -989,7 +990,7 @@ router.get("/reviewer/assigned/:poster_id", async (req, res) => {
 });
 
 
-router.get("/getConferenceInfo/:poster_id",async (req,res) =>   //retrives conference id,title and paper_title
+router.get("/getConferenceInfo/:poster_id",async (req,res) =>   
 {
   try {
       const poster_id = req.params.poster_id;
@@ -1109,6 +1110,75 @@ router.get("/request/:user_id", async (req, res) => {
 
 
 
+router.get("/request/:user_id/withAuthors", async (req, res) => {
+  try {
+
+    const user_id = req.params.user_id;
+
+    // console.log(user_id);
+
+
+
+    var { data, error } = await db //fetching data from paper table.
+      .from('requestPoster')
+      .select('*')
+      .eq('user_id', user_id); 
+
+    //   data = data.flat();
+
+    const PosterIds = [...new Set(data.map(item => item.poster_id))];
+
+
+
+    // console.log(PaperIds);
+
+    let poster_info = [];
+    for(let i = 0; i<PosterIds.length; i++){
+
+        let pid = PosterIds[i];
+        var {data, error} = await db
+        .from('poster')
+        .select('*')
+        .eq('poster_id' , pid);
+
+
+        poster_info.push(data);
+    }
+
+    poster_info =  poster_info.flat();
+
+
+    let poster_author_info = [];
+    for(let i = 0; i<PosterIds.length; i++){
+
+        let pid = PosterIds[i];
+        var {data, error} = await db
+        .from('posterAuthor')
+        .select('*')
+        .eq('poster_id' , pid);
+
+
+        poster_author_info.push(data);
+    }
+    console.log("poster info");
+    console.log(poster_info);
+
+    console.log("poster author info");
+    console.log(poster_author_info);
+
+    //   console.log(data);
+
+    res.status(200).json(poster_info);
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
 router.post("/request/delete_request", async (req, res) => {
   try {
 
@@ -1125,14 +1195,14 @@ router.post("/request/delete_request", async (req, res) => {
       console.log("request id print korchi")
       console.log(request_id)
 
-      let notification_id = (await db
-      .from('requestNotification').select('notification_id')
-      .eq("request_id",request_id)).data
+      // let notification_id = (await db
+      // .from('requestNotification').select('notification_id')
+      // .eq("request_id",request_id)).data
 
       
-      console.log("notification id print korchi")
-      console.log(notification_id)
-      notification_id = notification_id[0].notification_id
+      // console.log("notification id print korchi")
+      // console.log(notification_id)
+      // notification_id = notification_id[0].notification_id
       
 
       
@@ -1151,10 +1221,10 @@ router.post("/request/delete_request", async (req, res) => {
 
 
 
-      await db
-      .from('notification')
-      .delete()
-      .eq('notification_id',notification_id)
+      // await db
+      // .from('notification')
+      // .delete()
+      // .eq('notification_id',notification_id)
 
     res.status(201).json("deleted successfully");
   } catch (error2) {
@@ -1166,7 +1236,7 @@ router.post("/request/delete_request", async (req, res) => {
 });
 
 
-router.get("/get_conference_chair/:poster_id", async (req, res) => { //retrieves paper info based on paper id
+router.get("/get_conference_chair/:poster_id", async (req, res) => { 
   try {
 
     const poster_id = req.params.poster_id;
@@ -1292,23 +1362,25 @@ router.get("/reviewer/assignedPosters/:user_id", async (req, res) => {
           ...item.poster
      }));
 
-     for(let i=0; i<restructuredData.length; i++)
-     {
-      const { data: revisedData } = await db.from('revisePaperSubmission').select('*').eq('poster_id', restructuredData[i].poster_id);
+     console.log(restructuredData);
 
-      if(revisedData.length > 0)
-      {
-          const currentDate = new Date();
+    //  for(let i=0; i<restructuredData.length; i++)
+    //  {
+    //   const { data: revisedData } = await db.from('revisePaperSubmission').select('*').eq('poster_id', restructuredData[i].poster_id);
 
-          restructuredData[i].submission_deadline = revisedData[0].deadline;
+    //   if(revisedData.length > 0)
+    //   {
+    //       const currentDate = new Date();
 
-           const submissionDeadline = new Date(
-          `${restructuredData[i].submission_deadline.date}T${restructuredData[i].submission_deadline.time}`);
+    //       restructuredData[i].submission_deadline = revisedData[0].deadline;
 
-          if (submissionDeadline < currentDate) restructuredData[i].submission_status = "closed";
-          else restructuredData[i].submission_status = "open";
-      }
-     }
+    //        const submissionDeadline = new Date(
+    //       `${restructuredData[i].submission_deadline.date}T${restructuredData[i].submission_deadline.time}`);
+
+    //       if (submissionDeadline < currentDate) restructuredData[i].submission_status = "closed";
+    //       else restructuredData[i].submission_status = "open";
+    //   }
+    //  }
 
      res.json(restructuredData);
 
