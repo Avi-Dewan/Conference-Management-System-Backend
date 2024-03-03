@@ -2150,5 +2150,70 @@ router.post("/chairOrNot", async (req, res) => {
 });
 
 
+router.put("/:conference_id", async (req, res) => {
+  try {
+    const conference_id = req.params.conference_id;
+
+
+    const { conference_title,
+    conference_description,
+    conference_webpage,
+    venue,
+    start_date,
+    end_date,
+    submission_deadline } = req.body;
+    
+    // Create an object with the fields to update
+    const fieldsToUpdate = {
+     conference_id: conference_id,
+    };
+
+    if (conference_title) {
+      fieldsToUpdate.conference_title = conference_title;
+    }
+
+    if (conference_title) {
+      fieldsToUpdate.conference_title = conference_title;
+    }
+    
+    if (conference_description) {
+      fieldsToUpdate.conference_description = conference_description;
+    }
+    
+    if (conference_webpage) {
+      fieldsToUpdate.conference_webpage = conference_webpage;
+    }
+    
+    if (venue) {
+      fieldsToUpdate.venue = venue;
+    }
+    
+    if (start_date) {
+      fieldsToUpdate.start_date = start_date;
+    }
+
+    if (end_date) { 
+      fieldsToUpdate.end_date = end_date;
+    }
+
+    if (submission_deadline) {
+      fieldsToUpdate.submission_deadline = submission_deadline;
+    }
+
+    // Update the conference details
+
+    const { data, error } = await db.from('conference').update(fieldsToUpdate).eq('conference_id', conference_id);
+
+    if (error) {
+      throw error;
+    }
+
+    res.status(201).json('Conference details updated successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
 module.exports = router;
 
