@@ -568,7 +568,7 @@ router.get("/assign/auto/:poster_id", async (req, res) => {
   
       let notification_id = uuidv4()
   
-      let notification_body = "You are requested to review the following paper";
+      let notification_body = "You are requested to review the following poster";
   
       
         await db

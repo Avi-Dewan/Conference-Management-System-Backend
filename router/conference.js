@@ -651,7 +651,7 @@ router.get("/:conference_id/postersWithAuthors/:poster_id", async (req, res) => 
 
     // Fetch authors for each paper
     const postersWithAuthors = await Promise.all(
-      papers.map(async (poster) => {
+      posters.map(async (poster) => {
         const { data: authors, error: authorsError } = await db
           .from('posterAuthor')
           .select('user_id')
