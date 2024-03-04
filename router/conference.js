@@ -397,13 +397,13 @@ router.get("/:conference_id/papersWithAuthors", async (req, res) => {
        throw reviewsError;
      }
 
-
+     
      // Add full_name field to each reviewer
      const reviewsWithFullName = reviews.map((reviewer) => ({
-      user_id: `${reviewer.user_id}`,
+      user_id: reviewer.user_id,
       rating: reviewer.rating,
-      review: `${reviewer.review}`,
-      full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+      review: reviewer.review,
+      full_name: reviewer.user.first_name + ' ' + reviewer.user.last_name,
     }));
 
 
@@ -516,10 +516,10 @@ router.get("/:conference_id/papersWithAuthors/:paper_id", async (req, res) => {
 
      // Add full_name field to each reviewer
      const reviewsWithFullName = reviews.map((reviewer) => ({
-      user_id: `${reviewer.user_id}`,
+      user_id: reviewer.user_id,
       rating: reviewer.rating,
-      review: `${reviewer.review}`,
-      full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+      review: reviewer.review,
+      full_name: reviewer.user.first_name + ' ' + reviewer.user.last_name,
     }));
 
 
@@ -635,10 +635,10 @@ router.get("/:conference_id/postersWithAuthors", async (req, res) => {
 
      // Add full_name field to each reviewer
      const reviewsWithFullName = reviews.map((reviewer) => ({
-      user_id: `${reviewer.user_id}`,
+      user_id: reviewer.user_id,
       rating: reviewer.rating,
-      review: `${reviewer.review}`,
-      full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+      review: reviewer.review,
+      full_name: reviewer.user.first_name + ' ' + reviewer.user.last_name,
     }));
 
 
@@ -752,10 +752,10 @@ router.get("/:conference_id/postersWithAuthors/:poster_id", async (req, res) => 
 
      // Add full_name field to each reviewer
      const reviewsWithFullName = reviews.map((reviewer) => ({
-      user_id: `${reviewer.user_id}`,
+      user_id: reviewer.user_id,
       rating: reviewer.rating,
-      review: `${reviewer.review}`,
-      full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+      review: reviewer.review,
+      full_name: reviewer.user.first_name + ' ' + reviewer.user.last_name,
     }));
 
 
@@ -1475,10 +1475,10 @@ router.get("/:conference_id/viewPendingReviewPapers/:paper_id", async (req, res)
 
      // Add full_name field to each reviewer
      const reviewsWithFullName = reviews.map((reviewer) => ({
-      user_id: `${reviewer.user_id}`,
+      user_id: reviewer.user_id,
       rating: reviewer.rating,
-      review: `${reviewer.review}`,
-      full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+      review: reviewer.review,
+      full_name: reviewer.user.first_name + ' ' + reviewer.user.last_name,
     }));
 
 
@@ -1612,10 +1612,10 @@ router.get("/:conference_id/viewPendingReviewPapers", async (req, res) => {
 
      // Add full_name field to each reviewer
      const reviewsWithFullName = reviews.map((reviewer) => ({
-      user_id: `${reviewer.user_id}`,
+      user_id: reviewer.user_id,
       rating: reviewer.rating,
-      review: `${reviewer.review}`,
-      full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+      review: reviewer.review,
+      full_name: reviewer.user.first_name + ' ' + reviewer.user.last_name,
     }));
 
 
@@ -1746,10 +1746,10 @@ router.get("/:conference_id/viewPendingReviewPosters/:poster_id", async (req, re
 
      // Add full_name field to each reviewer
      const reviewsWithFullName = reviews.map((reviewer) => ({
-      user_id: `${reviewer.user_id}`,
+      user_id: reviewer.user_id,
       rating: reviewer.rating,
-      review: `${reviewer.review}`,
-      full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+      review: reviewer.review,
+      full_name: reviewer.user.first_name + ' ' + reviewer.user.last_name,
     }));
 
 
@@ -1886,10 +1886,10 @@ router.get("/:conference_id/viewPendingReviewPosters", async (req, res) => {
 
      // Add full_name field to each reviewer
      const reviewsWithFullName = reviews.map((reviewer) => ({
-      user_id: `${reviewer.user_id}`,
+      user_id: reviewer.user_id,
       rating: reviewer.rating,
-      review: `${reviewer.review}`,
-      full_name: `${reviewer.user.first_name} ${reviewer.user.last_name}`,
+      review: reviewer.review,
+      full_name: reviewer.user.first_name + ' ' + reviewer.user.last_name,
     }));
 
 
